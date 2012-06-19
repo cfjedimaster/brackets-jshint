@@ -9,7 +9,7 @@ on each parse.
 
 Issues/Updates
 =====
-Initial release.
+Per feedback from Narciso Jaramillo, I use a checkbox to show enabled/disabled status and move to the item when you click a row.
 
 Credit
 =====

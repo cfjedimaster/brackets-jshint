@@ -33,6 +33,8 @@ define(function (require, exports, module) {
             var $jshintTable = $("<table class='zebra-striped condensed-table'>").append("<tbody>");
             $("<tr><th>Line</th><th>Declaration</th><th>Message</th></tr>").appendTo($jshintTable);
             
+            var $selectedRow;
+            
             errors.forEach(function (item) {
                 var makeCell = function (content) {
                     return $("<td/>").text(content);
@@ -51,6 +53,18 @@ define(function (require, exports, module) {
                                 .append(makeCell(item.evidence))
                                 .append(makeCell(item.reason))
                                 .appendTo($jshintTable);
+
+                    $row.click(function () {
+                        if ($selectedRow) {
+                            $selectedRow.removeClass("selected");
+                        }
+                        $row.addClass("selected");
+                        $selectedRow = $row;
+    
+                        var editor = EditorManager.getCurrentFullEditor();
+                        editor.setCursorPos(item.line - 1, item.col - 1);
+                        EditorManager.focusEditor();
+                    });
                     
                 }
 
@@ -74,12 +88,12 @@ define(function (require, exports, module) {
         
         if ($jshint.css("display") === "none") {
             $jshint.show();
-            CommandManager.get(VIEW_HIDE_JSHINT).setName("Disable JSHint");
+            CommandManager.get(VIEW_HIDE_JSHINT).setChecked(true);
             _handleHint();
             $(DocumentManager).on("currentDocumentChange documentSaved", _handleHint);
         } else {
             $jshint.hide();
-            CommandManager.get(VIEW_HIDE_JSHINT).setName("Enable JSHint");
+            CommandManager.get(VIEW_HIDE_JSHINT).setChecked(false);
             $(DocumentManager).off("currentDocumentChange documentSaved", null,  _handleHint);
         }
         EditorManager.resizeEditor();
