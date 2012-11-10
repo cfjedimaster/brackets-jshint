@@ -8,7 +8,15 @@ define(function (require, exports, module) {
         CommandManager          = brackets.getModule("command/CommandManager"),
         EditorManager           = brackets.getModule("editor/EditorManager"),
         DocumentManager         = brackets.getModule("document/DocumentManager"),
-        Menus                   = brackets.getModule("command/Menus");
+        Menus                   = brackets.getModule("command/Menus"),
+        NativeFileSystem		= brackets.getModule("file/NativeFileSystem").NativeFileSystem,
+        FileUtils				= brackets.getModule("file/FileUtils"),
+        Dialogs					= brackets.getModule("widgets/Dialogs"),
+
+        //current module's directory
+        moduleDir				= FileUtils.getNativeModuleDirectoryPath(module),
+        configFile				= new NativeFileSystem.FileEntry(moduleDir + '/config.js'),
+        config					= { options: {}, globals: {} };
 
     require("jshint/jshint");
     
@@ -25,7 +33,7 @@ define(function (require, exports, module) {
         }
         var text = editor.document.getText();
         
-        result = JSHINT(text);
+        result = JSHINT(text, config.options, config.globals);
                 
         if (!result) {
             var errors = JSHINT.errors;
@@ -121,7 +129,29 @@ define(function (require, exports, module) {
         });
 
     }
+
+    function showJSHintConfigError() {
+        Dialogs.showModalDialog(
+            Dialogs.DIALOG_ID_ERROR,
+            "JSHINT error",
+            "Unable to parse config file"
+        );
+    }
     
-    init();
+    FileUtils.readAsText(configFile)
+    .done(function (text, readTimestamp) {
+
+        //try to parse the config file
+        try {
+            config = JSON.parse(text);
+        } catch (e) {
+            console.log("Can't parse config file - " + e);
+            showJSHintConfigError();
+        }
+    })
+    .fail(function (error) {
+        showJSHintConfigError();
+    })
+    .then(init);
     
 });
