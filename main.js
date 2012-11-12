@@ -12,6 +12,7 @@ define(function (require, exports, module) {
         NativeFileSystem		= brackets.getModule("file/NativeFileSystem").NativeFileSystem,
         FileUtils				= brackets.getModule("file/FileUtils"),
         Dialogs					= brackets.getModule("widgets/Dialogs"),
+        Resizer                 = brackets.getModule("utils/Resizer"),
 
         //current module's directory
         moduleDir				= FileUtils.getNativeModuleDirectoryPath(module),
@@ -113,13 +114,16 @@ define(function (require, exports, module) {
     function init() {
         
         //add the HTML UI
-        $('.content').append('  <div id="jshint" class="bottom-panel">'
+        var content =          '  <div id="jshint" class="bottom-panel">'
                              + '  <div class="toolbar simple-toolbar-layout">'
                              + '    <div class="title">JSHint</div><a href="#" class="close">&times;</a>'
                              + '  </div>'
                              + '  <div class="table-container"/>'
-                             + '</div>');
-        $('#csslint').hide();
+                             + '</div>';
+
+        $(content).insertBefore("#status-bar");
+
+        $('#jshint').hide();
         
         var menu = Menus.getMenu(Menus.AppMenuBar.VIEW_MENU);
         menu.addMenuItem(VIEW_HIDE_JSHINT, "", Menus.AFTER, "menu-view-sidebar");
@@ -127,6 +131,10 @@ define(function (require, exports, module) {
         $('#jshint .close').click(function () {
             CommandManager.execute(VIEW_HIDE_JSHINT);
         });
+
+        // AppInit.htmlReady() has already executed before extensions are loaded
+        // so, for now, we need to call this ourself
+        Resizer.makeResizable($('#jshint').get(0), "vert", "top", 200);
 
     }
 
