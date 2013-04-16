@@ -126,7 +126,7 @@ define(function (require, exports, module) {
         $('#jshint').hide();
         
         var menu = Menus.getMenu(Menus.AppMenuBar.VIEW_MENU);
-        menu.addMenuItem(VIEW_HIDE_JSHINT, "", Menus.AFTER, "menu-view-sidebar");
+        menu.addMenuItem(VIEW_HIDE_JSHINT, "", Menus.AFTER);
 
         $('#jshint .close').click(function () {
             CommandManager.execute(VIEW_HIDE_JSHINT);

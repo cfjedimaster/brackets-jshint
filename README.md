@@ -9,6 +9,7 @@ on each parse.
 
 Issues/Updates
 =====
+[4/16/2013] Tweak to menu add
 [11/12/2012] Update code to properly insert the content over the status bar. Also made it resizable.  
 [9/26/2012] Fix width issue. Thanks to Randy Edmunds for the reports.
 
