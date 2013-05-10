@@ -9,7 +9,7 @@ on each parse.
 
 Issues/Updates
 =====
-[5/10/2013] Updated to JSHint 2.0.0. The older library is still there in case you want to switch back.
+[5/10/2013] Updated to JSHint 2.0.0. The older library is still there in case you want to switch back.  
 
 [4/16/2013] Tweak to menu add
 
