@@ -19,8 +19,8 @@ define(function (require, exports, module) {
         configFile				= new NativeFileSystem.FileEntry(moduleDir + '/config.js'),
         config					= { options: {}, globals: {} };
 
-    require("jshint/jshint");
-    
+    require("jshint/jshint-2.0.1");
+
     //commands
     var VIEW_HIDE_JSHINT = "jshint.run";
     
@@ -33,9 +33,9 @@ define(function (require, exports, module) {
             return;
         }
         var text = editor.document.getText();
-        
+
         result = JSHINT(text, config.options, config.globals);
-                
+
         if (!result) {
             var errors = JSHINT.errors;
 
