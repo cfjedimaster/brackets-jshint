@@ -6,18 +6,20 @@ define(function (require, exports, module) {
 
     var Commands                = brackets.getModule("command/Commands"),
         CommandManager          = brackets.getModule("command/CommandManager"),
-        EditorManager           = brackets.getModule("editor/EditorManager"),
+        Dialogs                 = brackets.getModule("widgets/Dialogs"),
         DocumentManager         = brackets.getModule("document/DocumentManager"),
+        EditorManager           = brackets.getModule("editor/EditorManager"),
+        FileUtils               = brackets.getModule("file/FileUtils"),
         Menus                   = brackets.getModule("command/Menus"),
-        NativeFileSystem		= brackets.getModule("file/NativeFileSystem").NativeFileSystem,
-        FileUtils				= brackets.getModule("file/FileUtils"),
-        Dialogs					= brackets.getModule("widgets/Dialogs"),
+        NativeFileSystem        = brackets.getModule("file/NativeFileSystem").NativeFileSystem,
+        PreferencesManager      = brackets.getModule("preferences/PreferencesManager"),
         Resizer                 = brackets.getModule("utils/Resizer"),
 
         //current module's directory
-        moduleDir				= FileUtils.getNativeModuleDirectoryPath(module),
-        configFile				= new NativeFileSystem.FileEntry(moduleDir + '/config.js'),
-        config					= { options: {}, globals: {} };
+        moduleDir               = FileUtils.getNativeModuleDirectoryPath(module),
+        prefs                   = PreferencesManager.getPreferencesStorage(module),
+        configFile              = new NativeFileSystem.FileEntry(moduleDir + '/config.js'),
+        config                  = { options: {}, globals: {} };
 
     require("jshint/jshint-2.0.1");
 
@@ -91,7 +93,7 @@ define(function (require, exports, module) {
         }
         
     }
-
+    
     function _handleShowJSHint() {
         var $jshint = $("#jshint");
         
@@ -105,8 +107,8 @@ define(function (require, exports, module) {
             CommandManager.get(VIEW_HIDE_JSHINT).setChecked(false);
             $(DocumentManager).off("currentDocumentChange documentSaved", null,  _handleHint);
         }
+        
         EditorManager.resizeEditor();
-
     }
     
     CommandManager.register("Enable JSHint", VIEW_HIDE_JSHINT, _handleShowJSHint);
@@ -127,15 +129,19 @@ define(function (require, exports, module) {
         
         var menu = Menus.getMenu(Menus.AppMenuBar.VIEW_MENU);
         menu.addMenuItem(VIEW_HIDE_JSHINT, "", Menus.AFTER);
-
+        
+        
         $('#jshint .close').click(function () {
             CommandManager.execute(VIEW_HIDE_JSHINT);
         });
 
         // AppInit.htmlReady() has already executed before extensions are loaded
         // so, for now, we need to call this ourself
-        Resizer.makeResizable($('#jshint').get(0), "vert", "top", 200);
-
+        if (Resizer.DIRECTION_VERTICAL) {
+            Resizer.makeResizable($('#jshint').get(0), Resizer.DIRECTION_VERTICAL, Resizer.POSITION_TOP, 200);
+        } else {
+            Resizer.makeResizable($('#jshint').get(0), "vert", "top", 200);
+        }
     }
 
     function showJSHintConfigError() {
@@ -147,19 +153,19 @@ define(function (require, exports, module) {
     }
     
     FileUtils.readAsText(configFile)
-    .done(function (text, readTimestamp) {
+        .done(function (text, readTimestamp) {
 
-        //try to parse the config file
-        try {
-            config = JSON.parse(text);
-        } catch (e) {
-            console.log("Can't parse config file - " + e);
+            //try to parse the config file
+            try {
+                config = JSON.parse(text);
+            } catch (e) {
+                console.log("Can't parse config file - " + e);
+                showJSHintConfigError();
+            }
+        })
+        .fail(function (error) {
             showJSHintConfigError();
-        }
-    })
-    .fail(function (error) {
-        showJSHintConfigError();
-    })
-    .then(init);
+        })
+        .always(init);
     
 });
