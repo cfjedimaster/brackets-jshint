@@ -8,6 +8,7 @@ define(function (require, exports, module) {
 		CommandManager          = brackets.getModule("command/CommandManager"),
 		EditorManager           = brackets.getModule("editor/EditorManager"),
 		DocumentManager         = brackets.getModule("document/DocumentManager"),
+		ProjectManager				= brackets.getModule("project/ProjectManager"),
 		Menus                   = brackets.getModule("command/Menus"),
 		NativeFileSystem		= brackets.getModule("file/NativeFileSystem").NativeFileSystem,
 		FileUtils				= brackets.getModule("file/FileUtils"),
@@ -17,7 +18,7 @@ define(function (require, exports, module) {
 		//current module's directory
 		moduleDir				= FileUtils.getNativeModuleDirectoryPath(module),
 		configFile				= new NativeFileSystem.FileEntry(moduleDir + '/config.js'),
-		config					= { options: {}, globals: {} };
+		config					= { options:{}, globals: {} };
 
 	require("jshint/jshint-2.0.1");
 
@@ -33,12 +34,12 @@ define(function (require, exports, module) {
 	function isJSDoc(fileEntry) {
 		var filename = fileEntry.file.name;
 		var ext = filename.split(".").pop();
-		return (ext === "js"); 
+		return (ext === "js");
 	}
 
 	function _handleHint() {
 		var messages, result;
-		
+
 		var editor = EditorManager.getCurrentFullEditor();
 
 		if (!editor) {
@@ -56,84 +57,97 @@ define(function (require, exports, module) {
 			EditorManager.resizeEditor();
 		}
 
-		var text = editor.document.getText();
+		//sniff for .jshintrc
+		var options = config.options;
+		var globals = config.globals;
 
-		result = JSHINT(text, config.options, config.globals);
+		var projectConfig = new NativeFileSystem.FileEntry(ProjectManager.getProjectRoot().fullPath + '.jshintrc');
 
-		if (!result) {
-			var errors = JSHINT.errors;
+		FileUtils.readAsText(projectConfig).done(function (text, readTimestamp) {
+			if(text.length) {
+				try {
+					var thisConfig = JSON.parse(text);
+					/*
+					From what I see of the jshint docs, a .jshintrc has root keys that are options and
+					a key called globals. Possibly. So we need to copy everything *but* globals into
+					ob.options to make it work right with the call below. Actually screw that. I'm going to 
+					rewrite the default config.js to *not* use options as a subkey. I'll check with the
+					person who added this support since maybe they did it wrong.
 
-			var $jshintTable = $("<table class='zebra-striped condensed-table' style='table-layout: fixed; width: 100%'>").append("<tbody>");
-			$("<tr><th>Line</th><th>Declaration</th><th>Message</th></tr>").appendTo($jshintTable);
-			
-			var $selectedRow;
-			
-			errors.forEach(function (item) {
-				var makeCell = function (content) {
-					return $("<td style='word-wrap: break-word'/>").text(content);
-				};
+					Nope, screw my screw. I'm going to leave it as is and just make it work.
+					*/
+					options = thisConfig;
+					if(thisConfig.globals) {
+						delete thisConfig.globals;
+						globals = thisConfig.globals;
+					} else globals = {};
 
-				/*
-				if item is null, it means a fatal error, for now, not going to say anything about it.
-				*/
-				if (item) {
-
-					if (!item.line) { item.line = ""; }
-					if (!item.evidence) { item.evidence = ""; }
-					
-					var $row = $("<tr/>")
-								.append(makeCell(item.line))
-								.append(makeCell(item.evidence))
-								.append(makeCell(item.reason))
-								.appendTo($jshintTable);
-
-					$row.click(function () {
-						if ($selectedRow) {
-							$selectedRow.removeClass("selected");
-						}
-						$row.addClass("selected");
-						$selectedRow = $row;
-	
-						var editor = EditorManager.getCurrentFullEditor();
-						editor.setCursorPos(item.line - 1, item.col - 1);
-						EditorManager.focusEditor();
-					});
-					
+					console.log('overwriting with:',thisConfig);
+				} catch(e) {
 				}
+			}
+		}).then(function() {
 
-			});
+			var text = editor.document.getText();
 
-			$("#jshint .table-container")
-				.empty()
-				.append($jshintTable);
-				
-		} else {
-			//todo - tell the user no issues
-			$("#jshint .table-container")
-				.empty()
-				.append("<p>No issues.</p>");
-		}
-		
+			result = JSHINT(text, options, globals);
+
+			if (!result) {
+				var errors = JSHINT.errors;
+
+				var $jshintTable = $("<table class='zebra-striped condensed-table' style='table-layout: fixed; width: 100%'>").append("<tbody>");
+				$("<tr><th>Line</th><th>Declaration</th><th>Message</th></tr>").appendTo($jshintTable);
+
+				var $selectedRow;
+
+				errors.forEach(function (item) {
+					var makeCell = function (content) {
+						return $("<td style='word-wrap: break-word'/>").text(content);
+					};
+
+					/*
+					if item is null, it means a fatal error, for now, not going to say anything about it.
+					*/
+					if (item) {
+
+						if (!item.line) { item.line = ""; }
+						if (!item.evidence) { item.evidence = ""; }
+
+						var $row = $("<tr/>")
+									.append(makeCell(item.line))
+									.append(makeCell(item.evidence))
+									.append(makeCell(item.reason))
+									.appendTo($jshintTable);
+
+						$row.click(function () {
+							if ($selectedRow) {
+								$selectedRow.removeClass("selected");
+							}
+							$row.addClass("selected");
+							$selectedRow = $row;
+
+							var editor = EditorManager.getCurrentFullEditor();
+							editor.setCursorPos(item.line - 1, item.col - 1);
+							EditorManager.focusEditor();
+						});
+
+					}
+
+				});
+
+				$("#jshint .table-container")
+					.empty()
+					.append($jshintTable);
+
+			} else {
+				//todo - tell the user no issues
+				$("#jshint .table-container")
+					.empty()
+					.append("<p>No issues.</p>");
+			}
+
+		});
 	}
-
-	/* will remove for good later, honest
-	function _handleShowJSHint() {
-		var $jshint = $("#jshint");
-		
-		if ($jshint.css("display") === "none") {
-			$jshint.show();
-			CommandManager.get(VIEW_HIDE_JSHINT).setChecked(true);
-			_handleHint();
-			$(DocumentManager).on("currentDocumentChange documentSaved", _handleHint);
-		} else {
-			$jshint.hide();
-			CommandManager.get(VIEW_HIDE_JSHINT).setChecked(false);
-			$(DocumentManager).off("currentDocumentChange documentSaved", null,  _handleHint);
-		}
-		EditorManager.resizeEditor();
-
-	}
-	*/
 
 	function _handleEnableJSHint() {
 		console.log("running _handleEnableJSHint",jsHintEnabled);
