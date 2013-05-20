@@ -28,6 +28,8 @@ define(function (require, exports, module) {
 	//see the panel, but now the panel will be hidden on non-JS files
 	var jsHintEnabled = false;
 
+	var $jshint;
+
 	function isJSDoc(fileEntry) {
 		var filename = fileEntry.file.name;
 		var ext = filename.split(".").pop();
@@ -35,7 +37,6 @@ define(function (require, exports, module) {
 	}
 
 	function _handleHint() {
-		var $jshint = $("#jshint");
 		var messages, result;
 		
 		var editor = EditorManager.getCurrentFullEditor();
@@ -135,10 +136,15 @@ define(function (require, exports, module) {
 	*/
 
 	function _handleEnableJSHint() {
+		console.log("running _handleEnableJSHint",jsHintEnabled);
 		if(jsHintEnabled) {
 			jsHintEnabled = false;
 			CommandManager.get(VIEW_HIDE_JSHINT).setChecked(false);
 			$(DocumentManager).off("currentDocumentChange documentSaved", null,  _handleHint);
+			//if visible, hide
+			$jshint.hide();
+			EditorManager.resizeEditor();
+
 		} else {
 			jsHintEnabled = true;
 			CommandManager.get(VIEW_HIDE_JSHINT).setChecked(true);            
@@ -161,7 +167,9 @@ define(function (require, exports, module) {
 
 		$(content).insertBefore("#status-bar");
 
-		$('#jshint').hide();
+		$jshint = $("#jshint");
+
+		$jshint.hide();
 		
 		var menu = Menus.getMenu(Menus.AppMenuBar.VIEW_MENU);
 		menu.addMenuItem(VIEW_HIDE_JSHINT, "", Menus.AFTER);

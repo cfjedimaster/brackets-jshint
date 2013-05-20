@@ -9,6 +9,8 @@ on each parse.
 
 Issues/Updates
 =====
+[5/20/2013] I broke hiding jshint.
+
 [5/18/2013] It should, hopefully, not act like JSLint in terms of autohiding when switch to a HTML file (and auto showing when you go to a .js file)
 
 [5/10/2013] Updated to JSHint 2.0.0. The older library is still there in case you want to switch back.  
