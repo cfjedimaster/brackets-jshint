@@ -78,8 +78,8 @@ define(function (require, exports, module) {
 					*/
 					options = thisConfig;
 					if(thisConfig.globals) {
-						delete thisConfig.globals;
 						globals = thisConfig.globals;
+						delete thisConfig.globals;
 					} else globals = {};
 
 					console.log('overwriting with:',thisConfig);

@@ -9,6 +9,8 @@ on each parse.
 
 Issues/Updates
 =====
+5[21/2013] Fixed a really dumb mistake. Thanks Jogchum Koerts.
+
 [5/20/2013] Now supports reading .jshintrc files. Note - I do this on EVERY parse, and that is bad. I need
 to add some per-project caching. In my tests I couldn't tell that things had slowed down, but it really
 needs to be re-engineered to cache those checks.
