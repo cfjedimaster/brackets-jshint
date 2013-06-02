@@ -150,7 +150,6 @@ define(function (require, exports, module) {
 	}
 
 	function _handleEnableJSHint() {
-		console.log("running _handleEnableJSHint",jsHintEnabled);
 		if(jsHintEnabled) {
 			jsHintEnabled = false;
 			CommandManager.get(VIEW_HIDE_JSHINT).setChecked(false);
