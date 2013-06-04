@@ -41,7 +41,7 @@ define(function (require, exports, module) {
         if (!result) {
             var errors = JSHINT.errors;
 
-            var $jshintTable = $("<table class='zebra-striped condensed-table' style='table-layout: fixed; width: 100%'>").append("<tbody>");
+            var $jshintTable = $("<table class='table table-striped table-condensed zebra-striped condensed-table' style='table-layout: fixed; width: 100%'>").append("<tbody>");
             $("<tr><th>Line</th><th>Declaration</th><th>Message</th></tr>").appendTo($jshintTable);
             
             var $selectedRow;
