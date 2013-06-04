@@ -17,7 +17,6 @@ define(function (require, exports, module) {
 
         //current module's directory
         moduleDir               = FileUtils.getNativeModuleDirectoryPath(module),
-        prefs                   = PreferencesManager.getPreferencesStorage(module),
         configFile              = new NativeFileSystem.FileEntry(moduleDir + '/config.js'),
         config                  = { options: {}, globals: {} };
 
