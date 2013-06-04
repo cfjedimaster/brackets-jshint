@@ -4,11 +4,14 @@ brackets-jshint
 A Brackets extension to enable JSHint support. To install, place in your ```brackets/src/extensions/user``` folder.
 When installed, you can enable JSHint by clicking 'Enable JSHint' in your View menu.
 
-Currently only the default options are supported. I'm looking for feedback on how to provide ways to customize the options
-on each parse.
+Currently only the default options are supported.
 
 Issues/Updates
 =====
+[6/4/2013] Fixed a bug when .jshintrc didn't exist. Also switched to PanelManager. Note - if you do not
+see *any* JSHint results, I believe that is expected when no default options are specified. I think
+I may need to ship config.js with better default options.
+
 [5/24/2013] Added package.json
 
 [5/21/2013] Fixed a really dumb mistake. Thanks Jogchum Koerts.
