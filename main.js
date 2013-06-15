@@ -4,22 +4,22 @@
 define(function (require, exports, module) {
 	'use strict';
 
-	var commands 					= brackets.getModule("command/Commands"),
-		CommandManager          = brackets.getModule("command/CommandManager"),
-		EditorManager           = brackets.getModule("editor/EditorManager"),
-		DocumentManager         = brackets.getModule("document/DocumentManager"),
-		ProjectManager				= brackets.getModule("project/ProjectManager"),
-		Menus                   = brackets.getModule("command/Menus"),
-		NativeFileSystem			= brackets.getModule("file/NativeFileSystem").NativeFileSystem,
-		FileUtils					= brackets.getModule("file/FileUtils"),
-		Dialogs						= brackets.getModule("widgets/Dialogs"),
-		PanelManager				= brackets.getModule("view/PanelManager"),
-		AppInit                 = brackets.getModule("utils/AppInit"),
+    var commands                = brackets.getModule("command/Commands"),
+        CommandManager          = brackets.getModule("command/CommandManager"),
+        EditorManager           = brackets.getModule("editor/EditorManager"),
+        DocumentManager         = brackets.getModule("document/DocumentManager"),
+        ProjectManager          = brackets.getModule("project/ProjectManager"),
+        Menus                   = brackets.getModule("command/Menus"),
+        NativeFileSystem        = brackets.getModule("file/NativeFileSystem").NativeFileSystem,
+        FileUtils               = brackets.getModule("file/FileUtils"),
+        Dialogs                 = brackets.getModule("widgets/Dialogs"),
+        PanelManager            = brackets.getModule("view/PanelManager"),
+        AppInit                 = brackets.getModule("utils/AppInit"),
 
 		//current module's directory
-		moduleDir				= FileUtils.getNativeModuleDirectoryPath(module),
-		configFile				= new NativeFileSystem.FileEntry(moduleDir + '/config.js'),
-		config					= { options:{}, globals: {} };
+        moduleDir               = FileUtils.getNativeModuleDirectoryPath(module),
+        configFile               = new NativeFileSystem.FileEntry(moduleDir + '/config.js'),
+        config                  = { options: {}, globals: {} };
 
 	require("jshint/jshint-2.0.1");
 
@@ -42,16 +42,16 @@ define(function (require, exports, module) {
 	doHint does the linting with passed in args. handleHint is the wrapper that handles checking for project
 	options, defaults, etc
 	*/
-	function _doHint(o,g) {
+	function _doHint(o, g) {
 		var editor = EditorManager.getCurrentFullEditor();
 		var text = editor.document.getText();
 
-		var result = JSHINT(text,o,g);
+		var result = JSHINT(text, o, g);
 
 		if (!result) {
 			var errors = JSHINT.errors;
 
-			var $jshintTable = $("<table class='zebra-striped condensed-table' style='table-layout: fixed; width: 100%'>").append("<tbody>");
+			var $jshintTable = $("<table class='table-striped condensed-table' style='table-layout: fixed; width: 100%'>").append("<tbody>");
 			$("<tr><th>Line</th><th>Declaration</th><th>Message</th></tr>").appendTo($jshintTable);
 
 			var $selectedRow;
@@ -115,7 +115,7 @@ define(function (require, exports, module) {
 			return;
 		}
 
-		if(!isJSDoc(editor.document)) {
+		if (!isJSDoc(editor.document)) {
 			$jshint.hide();
 			EditorManager.resizeEditor();
 			return;
@@ -129,16 +129,16 @@ define(function (require, exports, module) {
 		var globals = config.globals;
 
 		var confPath = ProjectManager.getProjectRoot().fullPath + '.jshintrc';
-		NativeFileSystem.resolveNativeFileSystemPath(confPath, function(entry) {
-		}, function(err) {
-			_doHint(options,globals);
+		NativeFileSystem.resolveNativeFileSystemPath(confPath, function (entry) {
+		}, function (err) {
+			_doHint(options, globals);
 			return;
 		});
 
 		var projectConfig = new NativeFileSystem.FileEntry(confPath);
 
 		FileUtils.readAsText(projectConfig).done(function (text, readTimestamp) {
-			if(text.length) {
+			if (text.length) {
 				try {
 					var thisConfig = JSON.parse(text);
 					/*
@@ -151,22 +151,24 @@ define(function (require, exports, module) {
 					Nope, screw my screw. I'm going to leave it as is and just make it work.
 					*/
 					options = thisConfig;
-					if(thisConfig.globals) {
+					if (thisConfig.globals) {
 						globals = thisConfig.globals;
 						delete thisConfig.globals;
-					} else globals = {};
+					} else {
+                        globals = {};
+                    }
 
-				} catch(e) {
+				} catch (e) {
 				}
 			}
-		}).then(function() {
+		}).then(function () {
 			_doHint(options, globals);
 		});
 
 	}
 
 	function _handleEnableJSHint() {
-		if(jsHintEnabled) {
+		if (jsHintEnabled) {
 			jsHintEnabled = false;
 			CommandManager.get(VIEW_HIDE_JSHINT).setChecked(false);
 			$(DocumentManager).off("currentDocumentChange documentSaved", null,  _handleHint);
@@ -176,10 +178,18 @@ define(function (require, exports, module) {
 
 		} else {
 			jsHintEnabled = true;
-			CommandManager.get(VIEW_HIDE_JSHINT).setChecked(true);            
-			$(DocumentManager).on("currentDocumentChange documentSaved", _handleHint);
+			CommandManager.get(VIEW_HIDE_JSHINT).setChecked(true);
+            $(DocumentManager).on("currentDocumentChange documentSaved", _handleHint);
 			_handleHint();
 		}
+	}
+    
+    function showJSHintConfigError() {
+		Dialogs.showModalDialog(
+			Dialogs.DIALOG_ID_ERROR,
+			"JSHINT error",
+			"Unable to parse config file"
+		);
 	}
 
 	CommandManager.register("Enable JSHint", VIEW_HIDE_JSHINT, _handleEnableJSHint);
@@ -194,7 +204,7 @@ define(function (require, exports, module) {
 							 + '  <div class="table-container"/>'
 							 + '</div>';
 
-		$jshint = PanelManager.createBottomPanel("jshint.display.jshint",$(content),200);
+		$jshint = PanelManager.createBottomPanel("jshint.display.jshint", $(content), 200);
 		
 		var menu = Menus.getMenu(Menus.AppMenuBar.VIEW_MENU);
 		menu.addMenuItem(VIEW_HIDE_JSHINT, "", Menus.AFTER);
@@ -204,28 +214,19 @@ define(function (require, exports, module) {
 		});
 
 		FileUtils.readAsText(configFile)
-		.done(function (text, readTimestamp) {
+            .done(function (text, readTimestamp) {
 
 			//try to parse the config file
-			try {
-				config = JSON.parse(text);
-			} catch (e) {
-				console.log("Can't parse config file - " + e);
-				showJSHintConfigError();
-			}
-		})
-		.fail(function (error) {
-			showJSHintConfigError();
-		});
-
-	});
-
-	function showJSHintConfigError() {
-		Dialogs.showModalDialog(
-			Dialogs.DIALOG_ID_ERROR,
-			"JSHINT error",
-			"Unable to parse config file"
-		);
-	}
+                try {
+                    config = JSON.parse(text);
+                } catch (e) {
+                    console.log("Can't parse config file - " + e);
+                    showJSHintConfigError();
+                }
+            })
+            .fail(function (error) {
+                showJSHintConfigError();
+            });
+    });
 
 });
