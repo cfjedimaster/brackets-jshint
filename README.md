@@ -8,6 +8,8 @@ Currently only the default options are supported.
 
 Issues/Updates
 =====
+[6/16/2013] Merged in a bootstrap fix by DaBungalow
+
 [6/4/2013] Fixed a bug when .jshintrc didn't exist. Also switched to PanelManager. Note - if you do not
 see *any* JSHint results, I believe that is expected when no default options are specified. I think
 I may need to ship config.js with better default options.
