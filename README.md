@@ -8,6 +8,8 @@ Currently only the default options are supported.
 
 Issues/Updates
 =====
+[7/2/2013] Another fix by DaBungalow - https://github.com/cfjedimaster/brackets-jshint/pull/11
+
 [6/16/2013] Merged in a bootstrap fix by DaBungalow
 
 [6/4/2013] Fixed a bug when .jshintrc didn't exist. Also switched to PanelManager. Note - if you do not
