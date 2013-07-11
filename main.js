@@ -36,8 +36,8 @@ define(function (require, exports, module) {
     var $jshint;
 
     function isJSDoc(fileEntry) {
-        var language = LanguageManager.getLanguageForPath(fileEntry);
-        return (language === "javascript");
+        var language = LanguageManager.getLanguageForPath(fileEntry.file.fullPath);
+        return (language.getName() === "JavaScript");
     }
 
     /*

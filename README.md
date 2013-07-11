@@ -8,6 +8,8 @@ Currently only the default options are supported.
 
 Issues/Updates
 =====
+[7/11/2013] Looks like a slight change to APIs made the language check break. This fixes https://github.com/cfjedimaster/brackets-jshint/issues/12
+
 [7/2/2013] Another fix by DaBungalow - https://github.com/cfjedimaster/brackets-jshint/pull/11
 
 [6/16/2013] Merged in a bootstrap fix by DaBungalow
