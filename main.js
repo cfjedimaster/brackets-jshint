@@ -24,7 +24,7 @@ define(function (require, exports, module) {
             globals: {}
         };
 
-    require("jshint/jshint-2.0.1");
+    require("jshint/jshint-2.1.9");
 
     //commands
     var VIEW_HIDE_JSHINT = "jshint.run";
