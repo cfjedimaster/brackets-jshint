@@ -1,4 +1,4 @@
 {
-	"options": {},
+	"options": {"undef":true},
 	"globals": {}
 }

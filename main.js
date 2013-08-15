@@ -48,7 +48,6 @@ define(function (require, exports, module) {
     function _doHint(o, g) {
         var editor = EditorManager.getCurrentFullEditor();
         var text = editor.document.getText();
-
         var result = JSHINT(text, o, g);
 
         if (!result) {
