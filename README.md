@@ -8,6 +8,8 @@ Currently only the default options are supported.
 
 Issues/Updates
 =====
+[10/5/2013] jshint 2.1.11
+
 [8/15/2013] So - I'm having some issues with the defaults. It appears as if you pass NO options to JSHint, it is a bit
 too lax. One option in particular, undef, must default to false, and that to me is a mistake. So I've added it to
 config.js. As I think I've said before - I'm looking for feedback on how to make this better.
