@@ -3,10 +3,7 @@
 define(function (require, exports, module) {
     "use strict";
 
-    var commands = brackets.getModule("command/Commands"),
-        FileUtils = brackets.getModule("file/FileUtils"),
-        Dialogs = brackets.getModule("widgets/Dialogs"),
-        AppInit = brackets.getModule("utils/AppInit"),
+    var AppInit = brackets.getModule("utils/AppInit"),
         CodeInspection          = brackets.getModule("language/CodeInspection"),
         config = {
             "options": {"undef":true},
@@ -15,7 +12,7 @@ define(function (require, exports, module) {
 
 
     require("jshint/jshint");
-    
+
     function handleHinter(text,fullPath) {
         var resultJH = JSHINT(text, config.options, config.globals);
 
