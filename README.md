@@ -2,12 +2,19 @@ brackets-jshint
 =================
 
 A Brackets extension to enable JSHint support. To install, place in your ```brackets/src/extensions/user``` folder.
-When installed, you can enable JSHint by clicking 'Enable JSHint' in your View menu.
+Uses the linting API.
 
 Currently only the default options are supported.
 
 Issues/Updates
 =====
+[10/7/2013] Updated to the new Linting API. This required me to remove support for the default global config and per project
+config. The Linting API doesn't support an async response yet. In theory I could work around this, but for now I went
+the easier route. Don't forget that inline options should still work fine.
+
+NOTE - There is a bug in Brackets where if you open up Brackets and JS file is automatically loaded, it will lint with
+JSLint. Just edit/save the file one time and it should switch to JSHint for good. See https://github.com/adobe/brackets/issues/5442.
+
 [10/5/2013] jshint 2.1.11
 
 [8/15/2013] So - I'm having some issues with the defaults. It appears as if you pass NO options to JSHint, it is a bit
