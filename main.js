@@ -54,6 +54,12 @@ define(function (require, exports, module) {
             scanFile: handleHinter
         });
 
+        //This is a workaround due to some loading issues in Sprint 31. 
+        //See bug for details: https://github.com/adobe/brackets/issues/5442
+        CodeInspection.toggleEnabled();
+        CodeInspection.toggleEnabled();
+
+
     });
 
 });

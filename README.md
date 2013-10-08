@@ -8,6 +8,8 @@ Currently only the default options are supported.
 
 Issues/Updates
 =====
+[10/8/2013] Small mod to fix a loading issue with linting (temp)
+
 [10/8/2013] Off by one error w/ line #.
 
 [10/7/2013] Updated to the new Linting API. This required me to remove support for the default global config and per project
