@@ -8,6 +8,8 @@ Currently only the default options are supported.
 
 Issues/Updates
 =====
+[10/8/2013] Off by one error w/ line #.
+
 [10/7/2013] Updated to the new Linting API. This required me to remove support for the default global config and per project
 config. The Linting API doesn't support an async response yet. In theory I could work around this, but for now I went
 the easier route. Don't forget that inline options should still work fine.

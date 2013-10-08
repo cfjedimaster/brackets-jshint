@@ -33,7 +33,7 @@ define(function (require, exports, module) {
                 }
 
                 result.errors.push({
-                    pos: {line:messageOb.line, ch:messageOb.character},
+                    pos: {line:messageOb.line-1, ch:messageOb.character},
                     message:messageOb.reason,
                     type:type
                 });
