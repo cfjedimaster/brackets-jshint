@@ -5,13 +5,23 @@ define(function (require, exports, module) {
 
     var AppInit = brackets.getModule("utils/AppInit"),
         CodeInspection          = brackets.getModule("language/CodeInspection"),
-        config = {
-            "options": {"undef":true},
+        NativeFileSystem        = brackets.getModule("file/NativeFileSystem").NativeFileSystem,
+        ProjectManager          = brackets.getModule("project/ProjectManager"),
+        DocumentManager         = brackets.getModule("document/DocumentManager"),
+        defaultConfig = {
+            "options": {"undef": true},
             "globals": {}
-        };
+        },
+        config = defaultConfig;
 
 
     require("jshint/jshint");
+  
+    /**
+     * @private
+     * @type {string}
+     */
+    var _configFileName = ".jshintrc";
 
     function handleHinter(text,fullPath) {
         var resultJH = JSHINT(text, config.options, config.globals);
@@ -25,6 +35,8 @@ define(function (require, exports, module) {
                 var messageOb = errors[i];
                 //default
                 var type = CodeInspection.Type.WARNING;
+
+                if (!messageOb) continue;
 
                 if(messageOb.type === "error") {
                     type = CodeInspection.Type.ERROR;
@@ -47,6 +59,55 @@ define(function (require, exports, module) {
     }
 
 
+    /**
+     * Load project-wide JSHint configuration.
+     *
+     * JSHint project file should be located at <Project Root>/.jshintrc. It
+     * is loaded each time project is changed or the configuration file is
+     * modified.
+     * 
+     * @return Promise to return JSLint configuration object.
+     *
+     * @see <a href="http://www.jshint.com/docs/options/">JSHint option
+     * reference</a>.
+     */
+    function _loadProjectConfig() {
+
+        var projectRootEntry = ProjectManager.getProjectRoot(),
+            result = new $.Deferred(),
+            config;
+
+        projectRootEntry.getFile(_configFileName,
+            { create: false },
+            function (configFileEntry) {
+                var reader = new NativeFileSystem.FileReader();
+                configFileEntry.file(function (file) {
+                    reader.onload = function (event) {
+                        try {
+                            var cfg = {};
+                            config = JSON.parse(event.target.result);
+                            cfg.globals = config.globals || {};
+                            if ( config.globals ) { delete config.globals; }
+                            cfg.options = config;
+                            result.resolve(cfg);
+                        } catch (e) {
+                            result.reject(e);
+                        }
+                    };
+                    reader.onerror = function (event) {
+                        result.reject(event.target.error);
+                    };
+                    reader.readAsText(file);
+                });
+            },
+            function (err) {
+                result.reject(err);
+            });
+
+        return result.promise();
+
+    }
+    
     AppInit.appReady(function () {
 
         CodeInspection.register("javascript", {
@@ -54,11 +115,37 @@ define(function (require, exports, module) {
             scanFile: handleHinter
         });
 
+        $(DocumentManager)
+            .on("documentSaved.jshint documentRefreshed.jshint", function (e, document) {
+                // if this project's JSLint config has been updated, reload
+                if (document.file.fullPath ===
+                            ProjectManager.getProjectRoot().fullPath + _configFileName) {
+                    _loadProjectConfig()
+                        .done(function (newConfig) {
+                            config = newConfig;
+                        })
+                        .fail(function () {
+                            config = defaultConfig;
+                        });
+                }
+            });
+        
+        $(ProjectManager)
+            .on("projectOpen.jshint", function () {
+                _loadProjectConfig()
+                    .done(function (newConfig) {
+                        config = newConfig;
+                    })
+                    .fail(function () {
+                        config = defaultConfig;
+                    });
+            }); 
+
+        
         //This is a workaround due to some loading issues in Sprint 31. 
         //See bug for details: https://github.com/adobe/brackets/issues/5442
         CodeInspection.toggleEnabled();
         CodeInspection.toggleEnabled();
-
 
     });
 
