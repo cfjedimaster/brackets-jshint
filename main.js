@@ -20,16 +20,19 @@ define(function (require, exports, module) {
             var errors = JSHINT.errors;
 
             var result = { errors: [] };
-
             for(var i=0, len=errors.length; i<len; i++) {
                 var messageOb = errors[i];
+                //encountered an issue when jshint returned a null err
+                if(!messageOb) continue;
                 //default
-                var type = CodeInspection.Type.WARNING;
+                var type = CodeInspection.Type.ERROR;
 
-                if(messageOb.type === "error") {
-                    type = CodeInspection.Type.ERROR;
-                } else if(messageOb.type === "warning") {
-                    type = CodeInspection.Type.WARNING;
+                if("type" in messageOb) {
+                    if(messageOb.type === "error") {
+                        type = CodeInspection.Type.ERROR;
+                    } else if(messageOb.type === "warning") {
+                        type = CodeInspection.Type.WARNING;
+                    }
                 }
 
                 result.errors.push({
@@ -46,7 +49,12 @@ define(function (require, exports, module) {
 
     }
 
+        CodeInspection.register("javascript", {
+            name: "JSHint",
+            scanFile: handleHinter
+        });
 
+/*
     AppInit.appReady(function () {
 
         CodeInspection.register("javascript", {
@@ -61,5 +69,6 @@ define(function (require, exports, module) {
 
 
     });
+*/
 
 });

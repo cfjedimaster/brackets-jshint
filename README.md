@@ -8,6 +8,9 @@ Currently only the default options are supported.
 
 Issues/Updates
 =====
+[10/18/2013] Oddly, JSHint isn't giving me a type anymore, *and*, in the array it returned 
+for a file, one entry was null. I don't get it - but i handle it.
+
 [10/8/2013] Small mod to fix a loading issue with linting (temp)
 
 [10/8/2013] Off by one error w/ line #.
