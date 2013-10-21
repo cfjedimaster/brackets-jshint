@@ -77,7 +77,7 @@ define(function (require, exports, module) {
      * is loaded each time project is changed or the configuration file is
      * modified.
      * 
-     * @return Promise to return JSLint configuration object.
+     * @return Promise to return JSHint configuration object.
      *
      * @see <a href="http://www.jshint.com/docs/options/">JSHint option
      * reference</a>.
@@ -128,7 +128,7 @@ define(function (require, exports, module) {
 
         $(DocumentManager)
             .on("documentSaved.jshint documentRefreshed.jshint", function (e, document) {
-                // if this project's JSLint config has been updated, reload
+                // if this project's JSHint config has been updated, reload
                 if (document.file.fullPath ===
                             ProjectManager.getProjectRoot().fullPath + _configFileName) {
                     _loadProjectConfig()
