@@ -58,6 +58,17 @@ define(function (require, exports, module) {
 
     }
 
+    /**
+     * Refresh code inspection. This makes sure that JSHint is re-ran when
+     * configuration file is loaded.
+     * 
+     * This is a workaround due to some loading issues in Sprint 31. 
+     * See bug for details: https://github.com/adobe/brackets/issues/5442
+     */
+    function _refreshCodeInspection() {
+        CodeInspection.toggleEnabled();
+        CodeInspection.toggleEnabled();
+    }
 
     /**
      * Load project-wide JSHint configuration.
@@ -126,6 +137,9 @@ define(function (require, exports, module) {
                         })
                         .fail(function () {
                             config = defaultConfig;
+                        })
+                        .always(function () {
+                            _refreshCodeInspection();
                         });
                 }
             });
@@ -138,14 +152,23 @@ define(function (require, exports, module) {
                     })
                     .fail(function () {
                         config = defaultConfig;
+                    })
+                    .always(function () {
+                        _refreshCodeInspection();
                     });
             }); 
 
         
-        //This is a workaround due to some loading issues in Sprint 31. 
-        //See bug for details: https://github.com/adobe/brackets/issues/5442
-        CodeInspection.toggleEnabled();
-        CodeInspection.toggleEnabled();
+        _loadProjectConfig()
+            .done(function (newConfig) {
+                config = newConfig;
+            })
+            .fail(function () {
+                config = defaultConfig;
+            })
+            .always(function () {
+                _refreshCodeInspection();
+            });
 
     });
 
