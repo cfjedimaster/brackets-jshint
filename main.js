@@ -58,20 +58,9 @@ define(function (require, exports, module) {
 
     }
 
-    /**
-     * Refresh code inspection. This makes sure that JSHint is re-ran when
-     * configuration file is loaded.
-     * 
-     * This is a workaround due to some loading issues in Sprint 31. 
-     * See bug for details: https://github.com/adobe/brackets/issues/5442
-     */
-    function _refreshCodeInspection() {
-        CodeInspection.toggleEnabled();
-        CodeInspection.toggleEnabled();
-    }
 
     /**
-     * Load project-wide JSHint configuration.
+     * Loads project-wide JSHint configuration.
      *
      * JSHint project file should be located at <Project Root>/.jshintrc. It
      * is loaded each time project is changed or the configuration file is
@@ -94,16 +83,18 @@ define(function (require, exports, module) {
                 var reader = new NativeFileSystem.FileReader();
                 configFileEntry.file(function (file) {
                     reader.onload = function (event) {
+                        var cfg = {};
                         try {
-                            var cfg = {};
                             config = JSON.parse(event.target.result);
-                            cfg.globals = config.globals || {};
-                            if ( config.globals ) { delete config.globals; }
-                            cfg.options = config;
-                            result.resolve(cfg);
                         } catch (e) {
+                            console.error("Error parsing " + configFileEntry.fullPath + ". Details: " + e);
                             result.reject(e);
+                            return;
                         }
+                        cfg.globals = config.globals || {};
+                        if ( config.globals ) { delete config.globals; }
+                        cfg.options = config;
+                        result.resolve(cfg);
                     };
                     reader.onerror = function (event) {
                         result.reject(event.target.error);
@@ -119,6 +110,32 @@ define(function (require, exports, module) {
 
     }
     
+    /**
+     * Attempts to load project configuration file.
+     */
+    function tryLoadConfig() {
+        /**
+         * Makes sure JSHint is re-ran when the config is reloaded
+         * 
+         * This is a workaround due to some loading issues in Sprint 31. 
+         * See bug for details: https://github.com/adobe/brackets/issues/5442
+         */
+        function _refreshCodeInspection() {
+            CodeInspection.toggleEnabled();
+            CodeInspection.toggleEnabled();
+        }
+        _loadProjectConfig()
+            .done(function (newConfig) {
+                config = newConfig;
+            })
+            .fail(function () {
+                config = defaultConfig;
+            })
+            .always(function () {
+                _refreshCodeInspection();
+            });
+    }
+
     AppInit.appReady(function () {
 
         CodeInspection.register("javascript", {
@@ -131,45 +148,18 @@ define(function (require, exports, module) {
                 // if this project's JSHint config has been updated, reload
                 if (document.file.fullPath ===
                             ProjectManager.getProjectRoot().fullPath + _configFileName) {
-                    _loadProjectConfig()
-                        .done(function (newConfig) {
-                            config = newConfig;
-                        })
-                        .fail(function () {
-                            config = defaultConfig;
-                        })
-                        .always(function () {
-                            _refreshCodeInspection();
-                        });
+                    tryLoadConfig();
                 }
             });
         
         $(ProjectManager)
             .on("projectOpen.jshint", function () {
-                _loadProjectConfig()
-                    .done(function (newConfig) {
-                        config = newConfig;
-                    })
-                    .fail(function () {
-                        config = defaultConfig;
-                    })
-                    .always(function () {
-                        _refreshCodeInspection();
-                    });
-            }); 
+                tryLoadConfig();
+            });
+        
+        tryLoadConfig();
 
         
-        _loadProjectConfig()
-            .done(function (newConfig) {
-                config = newConfig;
-            })
-            .fail(function () {
-                config = defaultConfig;
-            })
-            .always(function () {
-                _refreshCodeInspection();
-            });
-
     });
 
 });
