@@ -3,9 +3,9 @@
 define(function (require, exports, module) {
     "use strict";
 
-    var AppInit = brackets.getModule("utils/AppInit"),
+    var AppInit                 = brackets.getModule("utils/AppInit"),
         CodeInspection          = brackets.getModule("language/CodeInspection"),
-        NativeFileSystem        = brackets.getModule("file/NativeFileSystem").NativeFileSystem,
+        FileSystem              = brackets.getModule("filesystem/FileSystem"),
         ProjectManager          = brackets.getModule("project/ProjectManager"),
         DocumentManager         = brackets.getModule("document/DocumentManager"),
         defaultConfig = {
@@ -13,7 +13,6 @@ define(function (require, exports, module) {
             "globals": {}
         },
         config = defaultConfig;
-
 
     require("jshint/jshint");
   
@@ -75,39 +74,29 @@ define(function (require, exports, module) {
 
         var projectRootEntry = ProjectManager.getProjectRoot(),
             result = new $.Deferred(),
+            file,
             config;
 
-        projectRootEntry.getFile(_configFileName,
-            { create: false },
-            function (configFileEntry) {
-                var reader = new NativeFileSystem.FileReader();
-                configFileEntry.file(function (file) {
-                    reader.onload = function (event) {
-                        var cfg = {};
-                        try {
-                            config = JSON.parse(event.target.result);
-                        } catch (e) {
-                            console.error("Error parsing " + configFileEntry.fullPath + ". Details: " + e);
-                            result.reject(e);
-                            return;
-                        }
-                        cfg.globals = config.globals || {};
-                        if ( config.globals ) { delete config.globals; }
-                        cfg.options = config;
-                        result.resolve(cfg);
-                    };
-                    reader.onerror = function (event) {
-                        result.reject(event.target.error);
-                    };
-                    reader.readAsText(file);
-                });
-            },
-            function (err) {
+        file = FileSystem.getFileForPath(projectRootEntry.fullPath + _configFileName);
+        file.readAsText(function (err, content) {
+            if (!err) {
+                var cfg = {};
+                try {
+                    config = JSON.parse(content);
+                } catch (e) {
+                    console.error("JSHint: error parsing " + file.fullPath + ". Details: " + e);
+                    result.reject(e);
+                    return;
+                }
+                cfg.globals = config.globals || {};
+                if ( config.globals ) { delete config.globals; }
+                cfg.options = config;
+                result.resolve(cfg);
+            } else {
                 result.reject(err);
-            });
-
+            }
+        });
         return result.promise();
-
     }
     
     /**
@@ -158,7 +147,6 @@ define(function (require, exports, module) {
             });
         
         tryLoadConfig();
-
         
     });
 
