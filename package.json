@@ -3,7 +3,7 @@
     "title": "JSHint",
     "description": "Adds JSHint support to Brackets.",
     "homepage": "https://github.com/cfjedimaster/brackets-jshint",
-    "version": "2.0.11",
+    "version": "2.0.13",
     "author": "Raymond Camden <raymondcamden@gmail.com> (http://www.raymondcamden.com)",
     "license": "MIT",
     "engines": {

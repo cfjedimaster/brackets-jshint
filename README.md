@@ -8,6 +8,15 @@ Currently only the default options are supported.
 
 Issues/Updates
 =====
+[11/2/2013] User busykai (Arzhan "kai" Kinzhalin) restored the ability to handle .jshintrc
+files in the project directory. I was initially against this request as I thought it made
+sense to wait and see if the linting API would help make this simpler, but, crap, what's the
+point of source control/contributions/etc if we can't move nimbly, right?? Not sure if that
+even makes sense. Anyway, thanks to busykai the feature is back!
+
+[10/18/2013] Oddly, JSHint isn't giving me a type anymore, *and*, in the array it returned 
+for a file, one entry was null. I don't get it - but i handle it.
+
 [10/8/2013] Small mod to fix a loading issue with linting (temp)
 
 [10/8/2013] Off by one error w/ line #.
