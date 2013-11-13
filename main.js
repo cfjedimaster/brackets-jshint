@@ -77,7 +77,7 @@ define(function (require, exports, module) {
             config;
 
         file = FileSystem.getFileForPath(projectRootEntry.fullPath + _configFileName);
-        file.readAsText(function (err, content) {
+        file.read(function (err, content) {
             if (!err) {
                 var cfg = {};
                 try {
