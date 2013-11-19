@@ -8,6 +8,8 @@ Currently only the default options are supported.
 
 Issues/Updates
 =====
+[11/19/2013] Brought in a .jshintrc fix and new FS support by by busykai
+
 [11/8/2013] Updated to JSHint 2.3.0
 
 [11/2/2013] User busykai (Arzhan "kai" Kinzhalin) restored the ability to handle .jshintrc
