@@ -27,7 +27,6 @@ define(function (require, exports, module) {
 
         if (!resultJH) {
             var errors = JSHINT.errors;
-
             var result = { errors: [] };
             for(var i=0, len=errors.length; i<len; i++) {
                 var messageOb = errors[i];
@@ -43,9 +42,14 @@ define(function (require, exports, module) {
                     }
                 }
 
+                var message = messageOb.reason;
+                if(messageOb.code) {
+                    message+= " ("+messageOb.code+")";
+                }
+
                 result.errors.push({
                     pos: {line:messageOb.line-1, ch:messageOb.character},
-                    message:messageOb.reason,
+                    message:message,
                     type:type
                 });
             }
