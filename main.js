@@ -90,6 +90,10 @@ define(function (require, exports, module) {
             file,
             config;
 
+        if (!projectRootEntry) {
+            return result.reject().promise();
+        }
+        
         file = FileSystem.getFileForPath(projectRootEntry.fullPath + _configFileName);
         file.read(function (err, content) {
             if (!err) {
