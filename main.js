@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2012 Raymond Camden
+ * 
+ * See the file LICENSE for copying permission.
+ */
+
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define, brackets, $, window, JSHINT*/
 define(function (require, exports, module) {
