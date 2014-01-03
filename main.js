@@ -28,36 +28,40 @@ define(function (require, exports, module) {
      */
     var _configFileName = ".jshintrc";
 
-    function handleHinter(text,fullPath) {
+    function handleHinter(text, fullPath) {
         var resultJH = JSHINT(text, config.options, config.globals);
 
         if (!resultJH) {
-            var errors = JSHINT.errors;
-            var result = { errors: [] };
-            for(var i=0, len=errors.length; i<len; i++) {
-                var messageOb = errors[i];
-                //encountered an issue when jshint returned a null err
-                if(!messageOb) continue;
-                //default
-                var type = CodeInspection.Type.ERROR;
-                if("type" in messageOb) {
-                    if(messageOb.type === "error") {
-                        type = CodeInspection.Type.ERROR;
-                    } else if(messageOb.type === "warning") {
-                        type = CodeInspection.Type.WARNING;
+            var errors = JSHINT.errors,
+                result = { errors: [] },
+                i,
+                len;
+            for (i = 0, len = errors.length; i < len; i++) {
+                var messageOb = errors[i],
+                    //default
+                    type = CodeInspection.Type.ERROR;
+                
+                // encountered an issue when jshint returned a null err
+                if (messageOb) {
+                    var message;
+                    if (messageOb.type !== undefined) {
+                        // default is ERROR, override only if it differs
+                        if (messageOb.type === "warning") {
+                            type = CodeInspection.Type.WARNING;
+                        }
                     }
+    
+                    message = messageOb.reason;
+                    if (messageOb.code) {
+                        message += " (" + messageOb.code + ")";
+                    }
+                    
+                    result.errors.push({
+                        pos: {line: messageOb.line - 1, ch: messageOb.character},
+                        message: message,
+                        type: type
+                    });
                 }
-
-                var message = messageOb.reason;
-                if(messageOb.code) {
-                    message+= " ("+messageOb.code+")";
-                }
-
-                result.errors.push({
-                    pos: {line:messageOb.line-1, ch:messageOb.character},
-                    message:message,
-                    type:type
-                });
             }
             return result;
         } else {
@@ -98,7 +102,7 @@ define(function (require, exports, module) {
                     return;
                 }
                 cfg.globals = config.globals || {};
-                if ( config.globals ) { delete config.globals; }
+                if (config.global) { delete config.globals; }
                 cfg.options = config;
                 result.resolve(cfg);
             } else {
