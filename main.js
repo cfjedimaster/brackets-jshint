@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012 Raymond Camden
- * 
+ *
  * See the file LICENSE for copying permission.
  */
 
@@ -21,7 +21,7 @@ define(function (require, exports, module) {
         config = defaultConfig;
 
     require("jshint/jshint");
-  
+
     /**
      * @private
      * @type {string}
@@ -36,11 +36,12 @@ define(function (require, exports, module) {
                 result = { errors: [] },
                 i,
                 len;
+
             for (i = 0, len = errors.length; i < len; i++) {
                 var messageOb = errors[i],
                     //default
                     type = CodeInspection.Type.ERROR;
-                
+
                 // encountered an issue when jshint returned a null err
                 if (messageOb) {
                     var message;
@@ -50,12 +51,12 @@ define(function (require, exports, module) {
                             type = CodeInspection.Type.WARNING;
                         }
                     }
-    
+
                     message = messageOb.reason;
                     if (messageOb.code) {
                         message += " (" + messageOb.code + ")";
                     }
-                    
+
                     result.errors.push({
                         pos: {line: messageOb.line - 1, ch: messageOb.character},
                         message: message,
@@ -76,66 +77,102 @@ define(function (require, exports, module) {
      *
      * JSHint project file should be located at <Project Root>/.jshintrc. It
      * is loaded each time project is changed or the configuration file is
-     * modified.
-     * 
-     * @return Promise to return JSHint configuration object.
+     * modified. If configuration is given in a package.json file, then it is
+     * given priority. If neither exist, then a default configuration is used.
+     *
+     * @param callback Passed JSHint configuration object.
      *
      * @see <a href="http://www.jshint.com/docs/options/">JSHint option
      * reference</a>.
      */
-    function _loadProjectConfig() {
+    function _loadProjectConfig(callback) {
+        var projectRootEntry = ProjectManager.getProjectRoot();
 
-        var projectRootEntry = ProjectManager.getProjectRoot(),
-            result = new $.Deferred(),
-            file,
-            config;
+        var jshintrcFile = FileSystem.getFileForPath(projectRootEntry.fullPath + _configFileName);
+        var packageFile = FileSystem.getFileForPath(projectRootEntry.fullPath + "package.json");
 
-        file = FileSystem.getFileForPath(projectRootEntry.fullPath + _configFileName);
-        file.read(function (err, content) {
-            if (!err) {
-                var cfg = {};
+        /**
+         * Attempt to read and then JSON parse a given file object.
+         */
+        function readAndParse(file, fileCb) {
+            file.read(function (err, content) {
+                if (err) {
+                    return fileCb(err);
+                }
+
+                var config;
+
                 try {
                     config = JSON.parse(content);
                 } catch (e) {
-                    console.error("JSHint: error parsing " + file.fullPath + ". Details: " + e);
-                    result.reject(e);
-                    return;
+                    console.error("JSHint: error parsing" + file.fullPath + ". Details: " + e);
+                    return fileCb(e);
                 }
-                cfg.globals = config.globals || {};
-                if (config.global) { delete config.globals; }
-                cfg.options = config;
-                result.resolve(cfg);
-            } else {
-                result.reject(err);
+
+                fileCb(null, config);
+            });
+        }
+
+        /**
+         * Move some fields around in the config object.
+         *
+         * @return Configuration object.
+         */
+        function distill(config) {
+            var cfg = { globals: config.globals || {} };
+
+            if (config.global) {
+                delete config.globals;
             }
+
+            cfg.options = config;
+
+            return cfg;
+        }
+
+        // Try to read config from package.json first.
+        readAndParse(packageFile, function (err, config) {
+            if (!err && config.jshintConfig) {
+                return callback(null, distill(config.jshintConfig));
+            }
+
+            // Try to read config from the .jshintrc file.
+            readAndParse(jshintrcFile, function (err, config) {
+                if (!err) {
+                    return callback(null, distill(config));
+                }
+
+                // If neither files provide config, use the default configuration.
+                callback(null, defaultConfig);
+            });
         });
-        return result.promise();
     }
-    
+
     /**
      * Attempts to load project configuration file.
      */
     function tryLoadConfig() {
         /**
-         * Makes sure JSHint is re-ran when the config is reloaded
-         * 
-         * This is a workaround due to some loading issues in Sprint 31. 
+         * Makes sure JSHint is re-run when the config is reloaded.
+         *
+         * This is a workaround due to some loading issues in Sprint 31.
          * See bug for details: https://github.com/adobe/brackets/issues/5442
          */
         function _refreshCodeInspection() {
             CodeInspection.toggleEnabled();
             CodeInspection.toggleEnabled();
         }
-        _loadProjectConfig()
-            .done(function (newConfig) {
-                config = newConfig;
-            })
-            .fail(function () {
-                config = defaultConfig;
-            })
-            .always(function () {
-                _refreshCodeInspection();
-            });
+
+        _loadProjectConfig(function (err, cfg) {
+            // Here for convention.
+            if (err) {
+                return console.error(err);
+            }
+
+            config = cfg;
+
+            _refreshCodeInspection();
+        });
     }
 
     AppInit.appReady(function () {
@@ -153,14 +190,14 @@ define(function (require, exports, module) {
                     tryLoadConfig();
                 }
             });
-        
+
         $(ProjectManager)
             .on("projectOpen.jshint", function () {
                 tryLoadConfig();
             });
-        
+
         tryLoadConfig();
-        
+
     });
 
 });
