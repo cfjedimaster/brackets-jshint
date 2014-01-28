@@ -23,12 +23,17 @@ define(function (require, exports, module) {
     require("jshint/jshint");
   
     /**
-     * Absolute path to the project's configuration file
-     *
      * @private
      * @type {string}
      */
     var _configFileName  = ".jshintrc";
+    
+    /**
+     * Absolute path to the project's configuration file that is being used by this module.
+     * @private
+     * @type {string}
+     */
+    var _loadedConfigFile = null;
 
     function handleHinter(text, fullPath) {
         var resultJH = JSHINT(text, config.options, config.globals);
@@ -74,7 +79,7 @@ define(function (require, exports, module) {
     /**
      * Transforms jshint concifguration into JSHint options.
      */
-    function transform(config) {
+    function _transform(config) {
         var cfg = {};
         cfg.globals = config.globals || {};
         if (config.global) { delete config.globals; }
@@ -100,6 +105,8 @@ define(function (require, exports, module) {
             file,
             config;
         
+        _loadedConfigFile = null;
+        
         file = FileSystem.getFileForPath(projectRootEntry.fullPath + "package.json");
         file.read(function (err, content) {
             if (!err) {
@@ -107,7 +114,8 @@ define(function (require, exports, module) {
                 try {
                     pkg = JSON.parse(content);
                     if (pkg.jshintConfig) {
-                        result.resolve(transform(pkg.jshintConfig));
+                        _loadedConfigFile = file.fullPath;
+                        result.resolve(_transform(pkg.jshintConfig));
                         return;
                     }
                 } catch (e) {
@@ -118,12 +126,13 @@ define(function (require, exports, module) {
             file.read(function (err, content) {
                 if (!err) {
                     try {
-                        config = transform(JSON.parse(content));
+                        config = _transform(JSON.parse(content));
                     } catch (e) {
                         console.error("JSHint: error parsing " + file.fullPath + ". Details: " + e);
                         result.reject("JSHint: error parsing " + file.fullPath + ". Details: " + e);
                         return;
                     }
+                    _loadedConfigFile = file.fullPath;
                     result.resolve(config);
                 } else {
                     result.reject(err);
@@ -169,8 +178,7 @@ define(function (require, exports, module) {
         $(DocumentManager)
             .on("documentSaved.jshint documentRefreshed.jshint", function (e, document) {
                 // if this project's JSHint config has been updated, reload
-                if (document.file.fullPath ===
-                            ProjectManager.getProjectRoot().fullPath + _configFileName) {
+                if (document.file.fullPath === _loadedConfigFile) {
                     tryLoadConfig();
                 }
             });
