@@ -26,7 +26,14 @@ define(function (require, exports, module) {
      * @private
      * @type {string}
      */
-    var _configFileName = ".jshintrc";
+    var _configFileName  = ".jshintrc";
+    
+    /**
+     * Absolute path to the project's configuration file that is being used by this module.
+     * @private
+     * @type {string}
+     */
+    var _loadedConfigFile = null;
 
     function handleHinter(text, fullPath) {
         var resultJH = JSHINT(text, config.options, config.globals);
@@ -67,8 +74,17 @@ define(function (require, exports, module) {
         } else {
             return null;
         }
-
-
+    }
+    
+    /**
+     * Transforms jshint concifguration into JSHint options.
+     */
+    function _transform(config) {
+        var cfg = {};
+        cfg.globals = config.globals || {};
+        if (config.global) { delete config.globals; }
+        cfg.options = config;
+        return cfg;
     }
 
     /**
@@ -77,37 +93,51 @@ define(function (require, exports, module) {
      * JSHint project file should be located at <Project Root>/.jshintrc. It
      * is loaded each time project is changed or the configuration file is
      * modified.
-     * 
+     *
      * @return Promise to return JSHint configuration object.
      *
      * @see <a href="http://www.jshint.com/docs/options/">JSHint option
      * reference</a>.
      */
     function _loadProjectConfig() {
-
         var projectRootEntry = ProjectManager.getProjectRoot(),
             result = new $.Deferred(),
             file,
             config;
-
-        file = FileSystem.getFileForPath(projectRootEntry.fullPath + _configFileName);
+        
+        _loadedConfigFile = null;
+        
+        file = FileSystem.getFileForPath(projectRootEntry.fullPath + "package.json");
         file.read(function (err, content) {
             if (!err) {
-                var cfg = {};
+                var pkg;
                 try {
-                    config = JSON.parse(content);
+                    pkg = JSON.parse(content);
+                    if (pkg.jshintConfig) {
+                        _loadedConfigFile = file.fullPath;
+                        result.resolve(_transform(pkg.jshintConfig));
+                        return;
+                    }
                 } catch (e) {
-                    console.error("JSHint: error parsing " + file.fullPath + ". Details: " + e);
-                    result.reject(e);
-                    return;
+                    // not a problem yet
                 }
-                cfg.globals = config.globals || {};
-                if (config.global) { delete config.globals; }
-                cfg.options = config;
-                result.resolve(cfg);
-            } else {
-                result.reject(err);
             }
+            file = FileSystem.getFileForPath(projectRootEntry.fullPath + _configFileName);
+            file.read(function (err, content) {
+                if (!err) {
+                    try {
+                        config = _transform(JSON.parse(content));
+                    } catch (e) {
+                        console.error("JSHint: error parsing " + file.fullPath + ". Details: " + e);
+                        result.reject("JSHint: error parsing " + file.fullPath + ". Details: " + e);
+                        return;
+                    }
+                    _loadedConfigFile = file.fullPath;
+                    result.resolve(config);
+                } else {
+                    result.reject(err);
+                }
+            });
         });
         return result.promise();
     }
@@ -148,8 +178,7 @@ define(function (require, exports, module) {
         $(DocumentManager)
             .on("documentSaved.jshint documentRefreshed.jshint", function (e, document) {
                 // if this project's JSHint config has been updated, reload
-                if (document.file.fullPath ===
-                            ProjectManager.getProjectRoot().fullPath + _configFileName) {
+                if (document.file.fullPath === _loadedConfigFile) {
                     tryLoadConfig();
                 }
             });
