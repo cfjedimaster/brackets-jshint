@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012 Raymond Camden
- * 
+ *
  * See the file LICENSE for copying permission.
  */
 
@@ -21,7 +21,7 @@ define(function (require, exports, module) {
         config = defaultConfig;
 
     require("jshint/jshint");
-  
+
     /**
      * @private
      * @type {string}
@@ -40,7 +40,7 @@ define(function (require, exports, module) {
                 var messageOb = errors[i],
                     //default
                     type = CodeInspection.Type.ERROR;
-                
+
                 // encountered an issue when jshint returned a null err
                 if (messageOb) {
                     var message;
@@ -50,12 +50,12 @@ define(function (require, exports, module) {
                             type = CodeInspection.Type.WARNING;
                         }
                     }
-    
+
                     message = messageOb.reason;
                     if (messageOb.code) {
                         message += " (" + messageOb.code + ")";
                     }
-                    
+
                     result.errors.push({
                         pos: {line: messageOb.line - 1, ch: messageOb.character},
                         message: message,
@@ -77,7 +77,7 @@ define(function (require, exports, module) {
      * JSHint project file should be located at <Project Root>/.jshintrc. It
      * is loaded each time project is changed or the configuration file is
      * modified.
-     * 
+     *
      * @return Promise to return JSHint configuration object.
      *
      * @see <a href="http://www.jshint.com/docs/options/">JSHint option
@@ -111,15 +111,15 @@ define(function (require, exports, module) {
         });
         return result.promise();
     }
-    
+
     /**
      * Attempts to load project configuration file.
      */
     function tryLoadConfig() {
         /**
          * Makes sure JSHint is re-ran when the config is reloaded
-         * 
-         * This is a workaround due to some loading issues in Sprint 31. 
+         *
+         * This is a workaround due to some loading issues in Sprint 31.
          * See bug for details: https://github.com/adobe/brackets/issues/5442
          */
         function _refreshCodeInspection() {
@@ -153,14 +153,14 @@ define(function (require, exports, module) {
                     tryLoadConfig();
                 }
             });
-        
+
         $(ProjectManager)
             .on("projectOpen.jshint", function () {
                 tryLoadConfig();
             });
-        
+
         tryLoadConfig();
-        
+
     });
 
 });
