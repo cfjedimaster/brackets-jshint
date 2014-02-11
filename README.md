@@ -9,9 +9,11 @@ JSHint can be configured configured by .jshintrc file located the project root. 
 
 Issues/Updates
 =====
-[2/9/2013] Remove comments in .jshintrc fix by https://github.com/santhoshtr. Also updated to latest JSHint library.
+[2/11/2014] busykai fix for empty projects
 
-[1/8/2013] lint and cleanup by busykai
+[2/9/2014] Remove comments in .jshintrc fix by https://github.com/santhoshtr. Also updated to latest JSHint library.
+
+[1/8/2014] lint and cleanup by busykai
 
 [12/10/2013] License added by busykai
 
