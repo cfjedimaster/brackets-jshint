@@ -4,7 +4,7 @@ brackets-jshint
 A Brackets extension to enable JSHint support. To install, place in your ```brackets/src/extensions/user``` folder.
 Uses the linting API.
 
-JSHint can be configured by .jshintrc file located the project root. See
+JSHint can be configured by .jshintrc file located in the project root. See
 [jshint documentation](http://www.jshint.com/docs/) for configuration options details and .jshintrc file format.
 
 Issues/Updates
