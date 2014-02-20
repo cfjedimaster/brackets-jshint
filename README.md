@@ -2,13 +2,16 @@ brackets-jshint
 =================
 
 A Brackets extension to enable JSHint support. To install, place in your ```brackets/src/extensions/user``` folder.
-Uses the linting API.
+
+To see the extension in action, open a JavaScript file. In the bottom right corner of your editor you will either see a green checkmark (which means no problems were found) or a yellow exclamation mark. Click on the exclamation mark and a bottom panel will open listing all the problems found.
 
 JSHint can be configured by .jshintrc file located in the project root. See
 [jshint documentation](http://www.jshint.com/docs/) for configuration options details and .jshintrc file format.
 
 Issues/Updates
 =====
+[2/20/2014] Includes two types fixes by mturkson23 and I added some text to the readme.md to explain how it works.
+
 [2/11/2014] busykai fix for empty projects
 
 [2/9/2014] Remove comments in .jshintrc fix by https://github.com/santhoshtr. Also updated to latest JSHint library.
