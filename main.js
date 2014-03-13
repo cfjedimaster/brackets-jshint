@@ -57,7 +57,7 @@ define(function (require, exports, module) {
                     }
 
                     result.errors.push({
-                        pos: {line: messageOb.line - 1, ch: messageOb.character},
+                        pos: {line: messageOb.line - 1, ch: messageOb.character - 1},
                         message: message,
                         type: type
                     });
