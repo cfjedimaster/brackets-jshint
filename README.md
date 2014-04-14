@@ -10,6 +10,8 @@ JSHint can be configured by .jshintrc file located in the project root. See
 
 Issues/Updates
 =====
+[4/14/204] Fix #46 - Basically just flesh out the package.json.
+
 [3/13/2014] Fix #44
 
 [2/20/2014] Includes two types fixes by mturkson23 and I added some text to the readme.md to explain how it works.
