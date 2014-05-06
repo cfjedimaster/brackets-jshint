@@ -18,7 +18,8 @@ define(function (require, exports, module) {
             "options": {"undef": true},
             "globals": {}
         },
-        config = defaultConfig;
+        config = defaultConfig,
+        configLoading;
 
     require("jshint/jshint");
 
@@ -69,6 +70,23 @@ define(function (require, exports, module) {
         }
 
 
+    }
+    
+    function handleHinterAsync(text, fullPath) {
+        var deferred = new $.Deferred();
+        if (!configLoading) {
+            configLoading = _loadProjectConfig();
+        }
+        configLoading
+            .done(function (cfg) {
+                config = cfg;
+                deferred.resolve(handleHinter(text, fullPath));
+            })
+            .fail(function (err) {
+                config = defaultConfig;
+                deferred.resolve(handleHinter(text, fullPath));
+            });
+        return deferred.promise();
     }
 
     /**
@@ -138,55 +156,29 @@ define(function (require, exports, module) {
 
         return str;
     }
-    /**
-     * Attempts to load project configuration file.
-     */
-    function tryLoadConfig() {
-        /**
-         * Makes sure JSHint is re-ran when the config is reloaded
-         *
-         * This is a workaround due to some loading issues in Sprint 31.
-         * See bug for details: https://github.com/adobe/brackets/issues/5442
-         */
-        function _refreshCodeInspection() {
-            CodeInspection.toggleEnabled();
-            CodeInspection.toggleEnabled();
-        }
-        _loadProjectConfig()
-            .done(function (newConfig) {
-                config = newConfig;
-            })
-            .fail(function () {
-                config = defaultConfig;
-            })
-            .always(function () {
-                _refreshCodeInspection();
-            });
-    }
 
     AppInit.appReady(function () {
-
-        CodeInspection.register("javascript", {
-            name: "JSHint",
-            scanFile: handleHinter
-        });
 
         $(DocumentManager)
             .on("documentSaved.jshint documentRefreshed.jshint", function (e, document) {
                 // if this project's JSHint config has been updated, reload
                 if (document.file.fullPath ===
                             ProjectManager.getProjectRoot().fullPath + _configFileName) {
-                    tryLoadConfig();
+                    configLoading = _loadProjectConfig();
                 }
             });
 
         $(ProjectManager)
             .on("projectOpen.jshint", function () {
-                tryLoadConfig();
+                configLoading = _loadProjectConfig();
             });
-
-        tryLoadConfig();
 
     });
 
+    CodeInspection.register("javascript", {
+        name: "JSHint",
+        scanFile: handleHinter,
+        scanFileAsync: handleHinterAsync
+    });
+    
 });
