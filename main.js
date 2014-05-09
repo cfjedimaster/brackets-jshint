@@ -12,7 +12,6 @@ define(function (require, exports, module) {
     var AppInit                 = brackets.getModule("utils/AppInit"),
         CodeInspection          = brackets.getModule("language/CodeInspection"),
         FileSystem              = brackets.getModule("filesystem/FileSystem"),
-        FileSystemError         = brackets.getModule("filesystem/FileSystemError"),
         FileUtils               = brackets.getModule("file/FileUtils"),
         ProjectManager          = brackets.getModule("project/ProjectManager"),
         DocumentManager         = brackets.getModule("document/DocumentManager"),
