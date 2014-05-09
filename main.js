@@ -12,13 +12,14 @@ define(function (require, exports, module) {
     var AppInit                 = brackets.getModule("utils/AppInit"),
         CodeInspection          = brackets.getModule("language/CodeInspection"),
         FileSystem              = brackets.getModule("filesystem/FileSystem"),
+        FileUtils               = brackets.getModule("file/FileUtils"),
         ProjectManager          = brackets.getModule("project/ProjectManager"),
         DocumentManager         = brackets.getModule("document/DocumentManager"),
         defaultConfig = {
             "options": {"undef": true},
             "globals": {}
         },
-        config = defaultConfig;
+        configLoading;
 
     require("jshint/jshint");
 
@@ -28,7 +29,22 @@ define(function (require, exports, module) {
      */
     var _configFileName = ".jshintrc";
 
-    function handleHinter(text, fullPath) {
+    /**
+     * Synchronous linting entry point.
+     *
+     * @param {string} text File contents.
+     * @param {string} fullPath Absolute path to the file.
+     * @param {object} config  JSHint configuration object.
+     *
+     * @return {object} Results of code inspection.
+     */
+    function handleHinter(text, fullPath, config) {
+        
+        // make sure that synchronous linter does not break
+        if (!config) {
+            config = defaultConfig;
+        }
+        
         var resultJH = JSHINT(text, config.options, config.globals);
 
         if (!resultJH) {
@@ -70,34 +86,39 @@ define(function (require, exports, module) {
 
 
     }
-
+    
     /**
-     * Loads project-wide JSHint configuration.
+     * Asynchronous linting entry point.
      *
-     * JSHint project file should be located at <Project Root>/.jshintrc. It
-     * is loaded each time project is changed or the configuration file is
-     * modified.
-     *
-     * @return Promise to return JSHint configuration object.
-     *
-     * @see <a href="http://www.jshint.com/docs/options/">JSHint option
-     * reference</a>.
+     * @param {string} text File contents.
+     * @param {string} fullPath Absolute path to the file.
+     * 
+     * @return {$.Promise} Promise to return results of code inspection.
      */
-    function _loadProjectConfig() {
-
-        var projectRootEntry = ProjectManager.getProjectRoot(),
-            result = new $.Deferred(),
-            file,
-            config;
-
-        if (!projectRootEntry) {
-            return result.reject().promise();
-        }
-        
-        file = FileSystem.getFileForPath(projectRootEntry.fullPath + _configFileName);
+    function handleHinterAsync(text, fullPath) {
+        var deferred = new $.Deferred();
+        _loadConfig(fullPath)
+            .done(function (cfg) {
+                deferred.resolve(handleHinter(text, fullPath, cfg));
+            });
+        return deferred.promise();
+    }
+    
+    /**
+     * Reads configuration file in the specified directory. Returns a promise for configuration object.
+     *
+     * @param {string} dir absolute path to a directory.
+     *
+     * @returns {$.Promise} a promise to return configuration object.
+     */
+    function _readConfig(dir) {
+        var result = new $.Deferred(),
+            file;
+        file = FileSystem.getFileForPath(dir + _configFileName);
         file.read(function (err, content) {
             if (!err) {
-                var cfg = {};
+                var cfg = {},
+                    config;
                 try {
                     config = JSON.parse(removeComments(content));
                 } catch (e) {
@@ -106,13 +127,96 @@ define(function (require, exports, module) {
                     return;
                 }
                 cfg.globals = config.globals || {};
-                if (config.global) { delete config.globals; }
+                if (config.globals) { delete config.globals; }
                 cfg.options = config;
                 result.resolve(cfg);
             } else {
                 result.reject(err);
             }
         });
+        return result.promise();
+    }
+    
+    /**
+     * Looks up the configuration file in the filesystem hierarchy and loads it.
+     *
+     * @param {string} dir Relative path to directory to start with.
+     * @param {function} proc Function to read and load configuration file.
+     *
+     * @returns {$.Promise} A promise for configuration.
+     */
+    function _lookupAndLoad(root, dir, readConfig) {
+        var deferred = new $.Deferred(),
+            done = false,
+            cdir = dir,
+            file,
+            iter = {
+                next: function () {
+                    if (done) {
+                        return;
+                    }
+                    cdir = FileUtils.getDirectoryPath(cdir.substring(0, cdir.length-1));
+                    readConfig(root + cdir)
+                        .then(function (cfg) {
+                            this.stop(cfg);
+                        }.bind(this))
+                        .fail(function () {
+                            if (!cdir) {
+                                this.stop(defaultConfig);
+                            }
+                            if (!done) {
+                                this.next();
+                            }
+                        }.bind(this));
+                },
+                stop: function (cfg) {
+                    deferred.resolve(cfg);
+                    done = true;
+                }
+            };
+        iter.next();
+        return deferred.promise();
+    }
+
+    /**
+     * Loads JSHint configuration for the specified file.
+     *
+     * The configuration file should have name .jshintrc. If the specified file is outside the
+     * current project root, then defaultConfiguration is used. Otherwise, the configuration file
+     * is looked up starting from the directory where the specified file is located, going up to
+     * the project root, but no further.
+     *
+     * @param {string} fullPath Absolute path for the file linted.
+     *
+     * @return {$.Promise} Promise to return JSHint configuration object.
+     *
+     * @see <a href="http://www.jshint.com/docs/options/">JSHint option
+     * reference</a>.
+     */
+    function _loadConfig(fullPath) {
+
+        var projectRootEntry = ProjectManager.getProjectRoot(),
+            result = new $.Deferred(),
+            relPath,
+            file,
+            config;
+
+        if (!projectRootEntry) {
+            return result.reject().promise();
+        }
+        
+        // for files outside the project root, use default config
+        if (!ProjectManager.isWithinProject(fullPath)) {
+            result.resolve(defaultConfig);
+            return result.promise();
+        }
+
+        relPath = FileUtils.getDirectoryPath(ProjectManager.makeProjectRelativeIfPossible(fullPath));
+        
+        _lookupAndLoad(projectRootEntry.fullPath, relPath, _readConfig)
+            .done(function (cfg) {
+                result.resolve(cfg);
+            });        
         return result.promise();
     }
 
@@ -138,55 +242,11 @@ define(function (require, exports, module) {
 
         return str;
     }
-    /**
-     * Attempts to load project configuration file.
-     */
-    function tryLoadConfig() {
-        /**
-         * Makes sure JSHint is re-ran when the config is reloaded
-         *
-         * This is a workaround due to some loading issues in Sprint 31.
-         * See bug for details: https://github.com/adobe/brackets/issues/5442
-         */
-        function _refreshCodeInspection() {
-            CodeInspection.toggleEnabled();
-            CodeInspection.toggleEnabled();
-        }
-        _loadProjectConfig()
-            .done(function (newConfig) {
-                config = newConfig;
-            })
-            .fail(function () {
-                config = defaultConfig;
-            })
-            .always(function () {
-                _refreshCodeInspection();
-            });
-    }
 
-    AppInit.appReady(function () {
-
-        CodeInspection.register("javascript", {
-            name: "JSHint",
-            scanFile: handleHinter
-        });
-
-        $(DocumentManager)
-            .on("documentSaved.jshint documentRefreshed.jshint", function (e, document) {
-                // if this project's JSHint config has been updated, reload
-                if (document.file.fullPath ===
-                            ProjectManager.getProjectRoot().fullPath + _configFileName) {
-                    tryLoadConfig();
-                }
-            });
-
-        $(ProjectManager)
-            .on("projectOpen.jshint", function () {
-                tryLoadConfig();
-            });
-
-        tryLoadConfig();
-
+    CodeInspection.register("javascript", {
+        name: "JSHint",
+        scanFile: handleHinter,
+        scanFileAsync: handleHinterAsync
     });
-
+    
 });
