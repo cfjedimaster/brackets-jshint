@@ -9,17 +9,14 @@
 define(function (require, exports, module) {
     "use strict";
 
-    var AppInit                 = brackets.getModule("utils/AppInit"),
-        CodeInspection          = brackets.getModule("language/CodeInspection"),
+    var CodeInspection          = brackets.getModule("language/CodeInspection"),
         FileSystem              = brackets.getModule("filesystem/FileSystem"),
         FileUtils               = brackets.getModule("file/FileUtils"),
         ProjectManager          = brackets.getModule("project/ProjectManager"),
-        DocumentManager         = brackets.getModule("document/DocumentManager"),
         defaultConfig = {
             "options": {"undef": true},
             "globals": {}
-        },
-        configLoading;
+        };
 
     require("jshint/jshint");
 
