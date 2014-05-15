@@ -10,6 +10,8 @@ JSHint can be configured by .jshintrc file located in the project root. See
 
 Issues/Updates
 =====
+[5/15/2014] Fix by busykai - issue 49.
+
 [5/9/2014] Yet another mod by busykai, this one is pretty big. It will now do 'proper' .jshintrc lookup - starting from current folder all the way up. Details at this PR: https://github.com/cfjedimaster/brackets-jshint/pull/48
 
 [4/14/2014] Fix #46 - Basically just flesh out the package.json.
