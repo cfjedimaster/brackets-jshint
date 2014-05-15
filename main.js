@@ -9,17 +9,14 @@
 define(function (require, exports, module) {
     "use strict";
 
-    var AppInit                 = brackets.getModule("utils/AppInit"),
-        CodeInspection          = brackets.getModule("language/CodeInspection"),
+    var CodeInspection          = brackets.getModule("language/CodeInspection"),
         FileSystem              = brackets.getModule("filesystem/FileSystem"),
         FileUtils               = brackets.getModule("file/FileUtils"),
         ProjectManager          = brackets.getModule("project/ProjectManager"),
-        DocumentManager         = brackets.getModule("document/DocumentManager"),
         defaultConfig = {
             "options": {"undef": true},
             "globals": {}
-        },
-        configLoading;
+        };
 
     require("jshint/jshint");
 
@@ -155,7 +152,6 @@ define(function (require, exports, module) {
                     if (done) {
                         return;
                     }
-                    cdir = FileUtils.getDirectoryPath(cdir.substring(0, cdir.length-1));
                     readConfig(root + cdir)
                         .then(function (cfg) {
                             this.stop(cfg);
@@ -165,6 +161,7 @@ define(function (require, exports, module) {
                                 this.stop(defaultConfig);
                             }
                             if (!done) {
+                                cdir = FileUtils.getDirectoryPath(cdir.substring(0, cdir.length - 1));
                                 this.next();
                             }
                         }.bind(this));
@@ -174,7 +171,11 @@ define(function (require, exports, module) {
                     done = true;
                 }
             };
-        iter.next();
+        if (cdir === undefined || cdir === null) {
+            deferred.resolve(defaultConfig);
+        } else {
+            iter.next();
+        }
         return deferred.promise();
     }
 
@@ -206,12 +207,12 @@ define(function (require, exports, module) {
         }
         
         // for files outside the project root, use default config
-        if (!ProjectManager.isWithinProject(fullPath)) {
+        if (!(relPath = FileUtils.getRelativeFilename(projectRootEntry.fullPath, fullPath))) {
             result.resolve(defaultConfig);
             return result.promise();
         }
 
-        relPath = FileUtils.getDirectoryPath(ProjectManager.makeProjectRelativeIfPossible(fullPath));
+        relPath = FileUtils.getDirectoryPath(relPath);
         
         _lookupAndLoad(projectRootEntry.fullPath, relPath, _readConfig)
             .done(function (cfg) {
