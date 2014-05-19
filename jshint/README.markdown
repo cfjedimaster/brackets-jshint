@@ -1,72 +1,47 @@
 JSHint, A Static Code Analysis Tool for JavaScript
-==================================================
+--------------------------------------------------
 
-JSHint is a community-driven tool to detect errors and potential problems in
-JavaScript code and to enforce your team's coding conventions.
+\[ [Use it online](http://jshint.com/) •  [About](http://jshint.com/about/) •
+[Docs](http://jshint.com/docs/) • [FAQ](http://jshint.com/docs/faq) •
+[Install](http://jshint.com/install/) • [Hack](http://jshint.com/hack/) •
+[Blog](http://jshint.com/blog/) • [Twitter](https://twitter.com/jshint/) \]
 
-**IMPORTANT**:
+[![Build Status](https://travis-ci.org/jshint/jshint.svg?branch=master)](https://travis-ci.org/jshint/jshint)
+[![NPM version](https://badge.fury.io/js/jshint.svg)](http://badge.fury.io/js/jshint)
 
- * This README is for people who are thinking about contributing to JSHint. For general usage
-   please refer to [our website](http://jshint.com/).
- * If you want to report a bug about the website, please go to the
-   [jshint/site](https://github.com/jshint/site/) repository.
- * If you want to report a bug or contribute to our NPM package, please go to the
-   [jshint/node-jshint](https://github.com/jshint/node-jshint/) repository.
+JSHint is a community-driven tool to detect errors and potential problems
+in JavaScript code. It is very flexible so you can easily adjust it to your
+particular coding guidelines and the environment you expect your code to
+execute in.
 
-Reporting a bug
----------------
+#### Reporting a bug
 
-To report a bug simply create a [new GitHub Issue](https://github.com/jshint/jshint/issues/new) and
-describe your problem or suggestion. We welcome all kind of feedback regarding JSHint including but
-not limited to:
+To report a bug simply create a
+[new GitHub Issue](https://github.com/jshint/jshint/issues/new) and describe
+your problem or suggestion. We welcome all kind of feedback regarding
+JSHint including but not limited to:
 
  * When JSHint doesn't work as expected
  * When JSHint complains about valid JavaScript code that works in all browsers
  * When you simply want a new option or feature
 
-Please, before reporting a bug look around to see if there are any open or closed tickets that
-cover your issue. And remember the wisdom: pull request > bug report > tweet.
+Before reporting a bug look around to see if there are any open or closed tickets
+that cover your issue. And remember the wisdom: pull request > bug report > tweet.
 
-Submitting patches
-------------------
+#### Issue Priority
 
-The best way to make sure your issue is addressed is to submit a patch. GitHub provides a very
-nice interface--pull requests--for that but we accept patches through all mediums: email, issue
-comment, tweet with a link to a snippet, etc.
+- *P1:* Something is throwing exceptions; broken JSHint backward compatibility.
+- *P2:* Something is not being parsed correctly.
+- *P3:* Features that the core team will work on once P2s and P1s are done.
+- *P4:* Patches welcome; The request is good, but low priority.
 
-Before submitting a patch make sure that you comply to our style. We don't have specific style
-guide so just look around the code you are changing.
 
-Also, make sure that you write tests for new features and make sure that all tests pass before
-submitting a patch. Patches that break the build will be rejected.
+#### License
 
-**FEATURE FREEZE**: Please note that we currently have a feature freeze on new environments and
-styling options. The only patches we accept at this time are for bug fixes.
+JSHint is distributed under the MIT License. One file and one file only
+(src/stable/jshint.js) is distributed under the slightly modified MIT License.
 
-Tests
------
 
-To run tests you will need to install [node.js](http://nodejs.org/) and
-expresso. You can install the latter with npm:
-
-    npm install expresso
-
-After that, running the unit tests is as easy as:
-
-    expresso tests/unit/*.js
-
-Attribution
------------
-
-Core Team members:
-
- * [Anton Kovalyov](http://anton.kovalyov.net/) ([@valueof](http://twitter.com/valueof))
- * [Wolfgang Kluge](http://klugesoftware.de/) ([blog](http://gehirnwindung.de/))
- * [Josh Perez](http://www.goatslacker.com/) ([@goatslacker](http://twitter.com/goatslacker))
-
-Maintainer: Anton Kovalyov
-
-Thank you!
-----------
+#### Thank you!
 
 We really appreciate all kind of feedback and contributions. Thanks for using and supporting JSHint!
