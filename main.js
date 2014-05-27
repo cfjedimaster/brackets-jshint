@@ -95,6 +95,7 @@ define(function (require, exports, module) {
     function handleHinterAsync(text, fullPath) {
         var deferred = new $.Deferred();
         _loadConfig(fullPath)
+            .then(_applyOverrides(fullPath))
             .done(function (cfg) {
                 deferred.resolve(handleHinter(text, fullPath, cfg));
             });
@@ -132,6 +133,47 @@ define(function (require, exports, module) {
             }
         });
         return result.promise();
+    }
+
+    /**
+     * Applies per-file overrides, if any were provided in the configuration.
+     * Follows format supported in commit #df60b9c on JSHint repository:
+     * https://github.com/jshint/jshint/commit/df60b9c75daa4321a4d064fcab04e14692c94039
+     *
+     * @param   {string} fullPath  absolute path to the processed file
+     * @returns {Function}         function that returns a promise for configuration object with overrides applied
+     */
+    function _applyOverrides(fullPath) {
+
+        var basePath = ProjectManager.getProjectRoot().fullPath,
+            filePath = FileUtils.getRelativeFilename(basePath, fullPath);
+
+        return function(cfg) {
+
+            var bundle,
+                has = Object.prototype.hasOwnProperty.call.bind(Object),
+                overrides = cfg.options.overrides,
+                pattern;
+
+            if (overrides) {
+                delete cfg.options.overrides;
+
+                for (pattern in overrides) {
+                    if (has(overrides, pattern) && (new RegExp(pattern)).test(filePath)) {
+                        bundle = overrides[pattern];
+
+                        if (bundle.globals) {
+                            $.extend(true, cfg.globals, bundle.globals);
+                            delete bundle.globals;
+                        }
+                        $.extend(true, cfg.options, bundle);
+
+                    }
+                }
+            }
+
+            return cfg;
+        };
     }
     
     /**
