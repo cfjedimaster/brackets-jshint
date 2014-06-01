@@ -130,7 +130,8 @@ define(function (require, exports, module) {
                 // jslints -> cli.js -> loadConfig -> if (config['extends'])...
                 var baseConfigResult = $.Deferred();
                 if (config.extends) {
-                    var baseConfigResult = _readConfig(dir, config.extends);
+                    var extendFile = FileSystem.getFileForPath(dir + config.extends);
+                    baseConfigResult = _readConfig(extendFile.parentPath, extendFile.name);
                     delete config.extends;
                 }
                 else {
