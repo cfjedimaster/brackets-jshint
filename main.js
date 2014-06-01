@@ -105,13 +105,15 @@ define(function (require, exports, module) {
      * Reads configuration file in the specified directory. Returns a promise for configuration object.
      *
      * @param {string} dir absolute path to a directory.
+     * @param {string} configFileName name of the configuration file (optional)
      *
      * @returns {$.Promise} a promise to return configuration object.
      */
-    function _readConfig(dir) {
+    function _readConfig(dir, configFileName) {
         var result = new $.Deferred(),
             file;
-        file = FileSystem.getFileForPath(dir + _configFileName);
+        configFileName = configFileName || _configFileName;
+        file = FileSystem.getFileForPath(dir + configFileName);
         file.read(function (err, content) {
             if (!err) {
                 var cfg = {},
@@ -123,10 +125,25 @@ define(function (require, exports, module) {
                     result.reject(e);
                     return;
                 }
-                cfg.globals = config.globals || {};
-                if (config.globals) { delete config.globals; }
-                cfg.options = config;
-                result.resolve(cfg);
+                // Load any base config defined by "extends".
+                // The same functionality as in
+                // jslints -> cli.js -> loadConfig -> if (config['extends'])...
+                var baseConfigResult = $.Deferred();
+                if (config.extends) {
+                    var baseConfigResult = _readConfig(dir, config.extends);
+                    delete config.extends;
+                }
+                else {
+                    baseConfigResult.resolve({});
+                }
+                baseConfigResult.done( function (baseConfig) {
+                    cfg.globals = $.extend({}, baseConfig.globals, config.globals);
+                    if (config.globals) { delete config.globals; }
+                    cfg.options = $.extend({}, baseConfig.options, config);
+                    result.resolve(cfg);
+                }).fail(function (e) {
+                    result.reject(e);
+                });
             } else {
                 result.reject(err);
             }
