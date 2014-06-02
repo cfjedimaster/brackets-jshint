@@ -10,6 +10,8 @@ JSHint can be configured by .jshintrc file located in the project root. See
 
 Issues/Updates
 =====
+[6/2/2014] Merge in an improvement by hack112 to add "extends" support to .jshintrc. Details here: https://github.com/cfjedimaster/brackets-jshint/pull/54
+
 [5/20/2014] Fix by cgcgbcbc - update JSHint to 2.5.1
 
 [5/15/2014] Fix by busykai - issue 49.
