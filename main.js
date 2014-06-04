@@ -151,7 +151,7 @@ define(function (require, exports, module) {
         return function(cfg) {
 
             var bundle,
-                has = Object.prototype.hasOwnProperty.call.bind(Object),
+                has = Object.prototype.hasOwnProperty.call.bind(Object.prototype.hasOwnProperty),
                 overrides = cfg.options.overrides,
                 pattern;
 
