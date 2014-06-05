@@ -66,8 +66,6 @@ define(function (require, exports, module) {
             config = defaultConfig;
         }
         
-        _scanProjectOnly = pm.get(PREF_SCAN_PROJECT_ONLY);
-        
         var resultJH = JSHINT(text, config.options, config.globals);
 
         if (!resultJH) {
