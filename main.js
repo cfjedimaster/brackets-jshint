@@ -12,6 +12,7 @@ define(function (require, exports, module) {
     var CodeInspection          = brackets.getModule("language/CodeInspection"),
         FileSystem              = brackets.getModule("filesystem/FileSystem"),
         FileUtils               = brackets.getModule("file/FileUtils"),
+        PreferencesManager      = brackets.getModule("preferences/PreferencesManager"),
         ProjectManager          = brackets.getModule("project/ProjectManager"),
         defaultConfig = {
             "options": {"undef": true},
@@ -19,7 +20,30 @@ define(function (require, exports, module) {
         };
 
     require("jshint/jshint");
+    
+    var PREF_SCAN_PROJECT_ONLY = "scanProjectOnly",
+        JSHINT_NAME = "JSHint";
+    
+    var pm = PreferencesManager.getExtensionPrefs("jshint");
+    
+    pm.definePreference(PREF_SCAN_PROJECT_ONLY, "boolean", false)
+        .on("change", function (e, d) {
+            var val = pm.get(PREF_SCAN_PROJECT_ONLY);
+            if (_scanProjectOnly !== val) {
+                _scanProjectOnly = val;
+                CodeInspection.requestRun(JSHINT_NAME);
+            }
+        });
 
+    /**
+     * Extension preference which when set to true will limit the look up for configuration file
+     * to the project sub-tree. If false, the entire file tree will be searched. The default is
+     * false.
+     * @private
+     * @type {boolean}
+     */
+    var _scanProjectOnly = pm.get(PREF_SCAN_PROJECT_ONLY);
+    
     /**
      * @private
      * @type {string}
@@ -80,8 +104,6 @@ define(function (require, exports, module) {
         } else {
             return null;
         }
-
-
     }
     
     /**
@@ -259,6 +281,7 @@ define(function (require, exports, module) {
         var projectRootEntry = ProjectManager.getProjectRoot(),
             result = new $.Deferred(),
             relPath,
+            rootPath,
             file,
             config;
 
@@ -266,15 +289,22 @@ define(function (require, exports, module) {
             return result.reject().promise();
         }
         
-        // for files outside the project root, use default config
-        if (!(relPath = FileUtils.getRelativeFilename(projectRootEntry.fullPath, fullPath))) {
+        if (!_scanProjectOnly) {
+            // scan entire filesystem
+            rootPath = projectRootEntry.fullPath.substring(0, projectRootEntry.fullPath.indexOf("/") + 1);
+        } else {
+            rootPath = projectRootEntry.fullPath;
+        }
+        
+        // for files outside the root, use default config
+        if (!(relPath = FileUtils.getRelativeFilename(rootPath, fullPath))) {
             result.resolve(defaultConfig);
             return result.promise();
         }
 
         relPath = FileUtils.getDirectoryPath(relPath);
         
-        _lookupAndLoad(projectRootEntry.fullPath, relPath, _readConfig)
+        _lookupAndLoad(rootPath, relPath, _readConfig)
             .done(function (cfg) {
                 result.resolve(cfg);
             });        
@@ -305,7 +335,7 @@ define(function (require, exports, module) {
     }
 
     CodeInspection.register("javascript", {
-        name: "JSHint",
+        name: JSHINT_NAME,
         scanFile: handleHinter,
         scanFileAsync: handleHinterAsync
     });
