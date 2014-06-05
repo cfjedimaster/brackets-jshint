@@ -10,6 +10,23 @@ JSHint can be configured by .jshintrc file located in the project root. See
 
 Issues/Updates
 =====
+[6/5/2014] Two merges:
+
+@D1SoveR - https://github.com/cfjedimaster/brackets-jshint/pull/53
+JSHint has added support for overrides within .jshintrc file, as per jshint/jshint#1401.
+Additional routine within the config loading procedure attempts to match this behaviour.
+
+@busykai - https://github.com/cfjedimaster/brackets-jshint/pull/55
+Fix #52. Scan entire file tree for config.
+
+Also, add jshint.scanProjectOnly extension pref. When set to true would only scan up to the project root. The default is false -- scan the entire tree up to the root.
+
+In order to set the pref to limit the scan to project subtree, add the following to your brackets.json or to project's .brackets.json:
+
+{
+    "jshint.scanProjectOnly": true 
+}
+
 [6/2/2014] Merge in an improvement by hack112 to add "extends" support to .jshintrc. Details here: https://github.com/cfjedimaster/brackets-jshint/pull/54
 
 [5/20/2014] Fix by cgcgbcbc - update JSHint to 2.5.1
