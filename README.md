@@ -11,6 +11,8 @@ JSHint can be configured by .jshintrc file located in the project root. See
 Issues/Updates
 =====
 
+[12/10/2014] JSHint 2.5.10
+
 [10/20/2014] JSHint 2.5.6
 
 [8/22/2014] JSHint 2.5.2
