@@ -8,6 +8,15 @@ To see the extension in action, open a JavaScript file. In the bottom right corn
 JSHint can be configured by .jshintrc file located in the project root. See
 [jshint documentation](http://www.jshint.com/docs/) for configuration options details and .jshintrc file format.
 
+Brackets has JSLint built in and if you wish to ignore JSLint results, you must tell Brackets to explicitly use JSHint only. This can be done via a .brackets.json file in the root of your project. Simply use this block:
+
+    "language": {
+        "javascript": {
+            "linting.prefer": "JSHint",
+            "linting.usePreferredOnly": true
+        }
+    }
+
 Issues/Updates
 =====
 
