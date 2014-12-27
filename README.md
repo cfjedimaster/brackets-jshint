@@ -20,6 +20,8 @@ Brackets has JSLint built in and if you wish to ignore JSLint results, you must 
 Issues/Updates
 =====
 
+[12/26/2014] JSHint 2.5.11
+
 [12/10/2014] temp version bump for reg
 
 [10/20/2014] JSHint 2.5.6
