@@ -1,14 +1,14 @@
 {
-    "name": "camden.jshint",
-    "title": "JSHint",
-    "description": "Adds JSHint support to Brackets.",
-    "homepage": "https://github.com/cfjedimaster/brackets-jshint",
-    "version": "2.2.9",
-    "keywords":["lint","linting","linter"],
-    "categories":"linting",
-    "author": "Raymond Camden <raymondcamden@gmail.com> (http://www.raymondcamden.com)",
-    "license": "MIT",
-    "engines": {
-        "brackets": ">=0.38.0"
-    }
+  "name": "camden.jshint",
+  "title": "JSHint",
+  "description": "Adds JSHint support to Brackets.",
+  "homepage": "https://github.com/cfjedimaster/brackets-jshint",
+  "version": "2.2.10",
+  "keywords": ["lint", "linting", "linter"],
+  "categories": "linting",
+  "author": "Raymond Camden <raymondcamden@gmail.com> (http://www.raymondcamden.com)",
+  "license": "MIT",
+  "engines": {
+    "brackets": ">=0.38.0"
+  }
 }
