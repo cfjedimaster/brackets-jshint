@@ -3,7 +3,7 @@
   "title": "JSHint",
   "description": "Adds JSHint support to Brackets.",
   "homepage": "https://github.com/cfjedimaster/brackets-jshint",
-  "version": "2.2.10",
+  "version": "2.2.11",
   "keywords": ["lint", "linting", "linter"],
   "categories": "linting",
   "author": "Raymond Camden <raymondcamden@gmail.com> (http://www.raymondcamden.com)",
