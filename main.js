@@ -5,7 +5,7 @@
  */
 
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define, brackets, $, window, JSHINT*/
+/* global define, brackets, $, JSHINT */
 define(function (require, exports, module) {
     "use strict";
 
@@ -20,14 +20,14 @@ define(function (require, exports, module) {
         };
 
     require("jshint/jshint");
-    
+
     var PREF_SCAN_PROJECT_ONLY = "scanProjectOnly",
         JSHINT_NAME = "JSHint";
-    
+
     var pm = PreferencesManager.getExtensionPrefs("jshint");
-    
+
     pm.definePreference(PREF_SCAN_PROJECT_ONLY, "boolean", false)
-        .on("change", function (e, d) {
+        .on("change", function () {
             var val = pm.get(PREF_SCAN_PROJECT_ONLY);
             if (_scanProjectOnly !== val) {
                 _scanProjectOnly = val;
@@ -43,7 +43,7 @@ define(function (require, exports, module) {
      * @type {boolean}
      */
     var _scanProjectOnly = pm.get(PREF_SCAN_PROJECT_ONLY);
-    
+
     /**
      * @private
      * @type {string}
@@ -60,12 +60,12 @@ define(function (require, exports, module) {
      * @return {object} Results of code inspection.
      */
     function handleHinter(text, fullPath, config) {
-        
+
         // make sure that synchronous linter does not break
         if (!config) {
             config = defaultConfig;
         }
-        
+
         var resultJH = JSHINT(text, config.options, config.globals);
 
         if (!resultJH) {
@@ -105,13 +105,13 @@ define(function (require, exports, module) {
             return null;
         }
     }
-    
+
     /**
      * Asynchronous linting entry point.
      *
      * @param {string} text File contents.
      * @param {string} fullPath Absolute path to the file.
-     * 
+     *
      * @return {$.Promise} Promise to return results of code inspection.
      */
     function handleHinterAsync(text, fullPath) {
@@ -123,7 +123,7 @@ define(function (require, exports, module) {
             });
         return deferred.promise();
     }
-    
+
     /**
      * Reads configuration file in the specified directory. Returns a promise for configuration object.
      *
@@ -160,7 +160,7 @@ define(function (require, exports, module) {
                 else {
                     baseConfigResult.resolve({});
                 }
-                baseConfigResult.done( function (baseConfig) {
+                baseConfigResult.done(function (baseConfig) {
                     cfg.globals = $.extend({}, baseConfig.globals, config.globals);
                     if (config.globals) { delete config.globals; }
                     cfg.options = $.extend({}, baseConfig.options, config);
@@ -188,7 +188,7 @@ define(function (require, exports, module) {
         var basePath = ProjectManager.getProjectRoot().fullPath,
             filePath = FileUtils.getRelativeFilename(basePath, fullPath);
 
-        return function(cfg) {
+        return function (cfg) {
 
             var bundle,
                 has = Object.prototype.hasOwnProperty.call.bind(Object.prototype.hasOwnProperty),
@@ -215,12 +215,13 @@ define(function (require, exports, module) {
             return cfg;
         };
     }
-    
+
     /**
      * Looks up the configuration file in the filesystem hierarchy and loads it.
      *
-     * @param {string} dir Relative path to directory to start with.
-     * @param {function} proc Function to read and load configuration file.
+     * @param   {String}    root       Path to the current project root.
+     * @param   {string}    dir        Relative path to directory to start with.
+     * @param   {function}  readConfig Function to read and load configuration file.
      *
      * @returns {$.Promise} A promise for configuration.
      */
@@ -228,7 +229,6 @@ define(function (require, exports, module) {
         var deferred = new $.Deferred(),
             done = false,
             cdir = dir,
-            file,
             iter = {
                 next: function () {
                     if (done) {
@@ -281,21 +281,19 @@ define(function (require, exports, module) {
         var projectRootEntry = ProjectManager.getProjectRoot(),
             result = new $.Deferred(),
             relPath,
-            rootPath,
-            file,
-            config;
+            rootPath;
 
         if (!projectRootEntry) {
             return result.reject().promise();
         }
-        
+
         if (!_scanProjectOnly) {
             // scan entire filesystem
             rootPath = projectRootEntry.fullPath.substring(0, projectRootEntry.fullPath.indexOf("/") + 1);
         } else {
             rootPath = projectRootEntry.fullPath;
         }
-        
+
         // for files outside the root, use default config
         if (!(relPath = FileUtils.getRelativeFilename(rootPath, fullPath))) {
             result.resolve(defaultConfig);
@@ -303,11 +301,11 @@ define(function (require, exports, module) {
         }
 
         relPath = FileUtils.getDirectoryPath(relPath);
-        
+
         _lookupAndLoad(rootPath, relPath, _readConfig)
             .done(function (cfg) {
                 result.resolve(cfg);
-            });        
+            });
         return result.promise();
     }
 
@@ -339,5 +337,5 @@ define(function (require, exports, module) {
         scanFile: handleHinter,
         scanFileAsync: handleHinterAsync
     });
-    
+
 });

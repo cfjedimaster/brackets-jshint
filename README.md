@@ -10,15 +10,19 @@ JSHint can be configured by .jshintrc file located in the project root. See
 
 Brackets has JSLint built in and if you wish to ignore JSLint results, you must tell Brackets to explicitly use JSHint only. This can be done via a .brackets.json file in the root of your project. Simply use this block:
 
-    "language": {
-        "javascript": {
-            "linting.prefer": "JSHint",
-            "linting.usePreferredOnly": true
-        }
+```json
+"language": {
+    "javascript": {
+        "linting.prefer": "JSHint",
+        "linting.usePreferredOnly": true
     }
+}
+```
 
 Issues/Updates
 =====
+
+[03/11/2015] JSHint 2.6.3 @Hirse
 
 [2/7/2015] JSHint 2.6.0
 
