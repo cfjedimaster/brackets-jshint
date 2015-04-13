@@ -54,3 +54,10 @@ Pennisi](https://github.com/jugglinmike/).
 ## Thank you!
 
 We really appreciate all kinds of feedback and contributions. Thanks for using and supporting JSHint!
+
+# ECMAScript 6, 7 and next
+
+The following features are supported:
+
+  * async/await: backported from [Seb Vincent](https://github.com/sebv/jshint/tree/esnextnext) esnextnext branch and merged into jshint master
+
