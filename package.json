@@ -1,15 +1,15 @@
 {
   "name": "camden.jshint.esnext",
   "title": "JSHint (async/await)",
-  "description": "Adds JSHint to Brackets with experimental async/await support.",
-  "homepage": "https://github.com/cfjedimaster/brackets-jshint",
+  "description": "Adds JSHint to Brackets with experimental async/await support (forked from Raymond Camden extension).",
+  "homepage": "https://github.com/marcominetti/brackets-jshint",
   "version": "2.7.0",
   "keywords": ["lint", "linting", "linter"],
   "categories": "linting",
-  "author": "Raymond Camden <raymondcamden@gmail.com> (http://www.raymondcamden.com)",
+  "author": "Marco Minetti <marco.minetti@novetica.org>",
   "contributors": [{
-    "name": "Marco Minetti",
-    "email": "marco.minetti@novetica.org"
+    "name": "Raymond Camden",
+    "email": "raymondcamden@gmail.com"
   }],
   "license": "MIT",
   "engines": {
