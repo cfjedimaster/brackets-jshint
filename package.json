@@ -1,7 +1,7 @@
 {
   "name": "camden.jshint.esnext",
-  "title": "JSHint",
-  "description": "Adds JSHint support to Brackets.",
+  "title": "JSHint (async/await)",
+  "description": "Adds JSHint to Brackets with experimental async/await support.",
   "homepage": "https://github.com/cfjedimaster/brackets-jshint",
   "version": "2.7.0",
   "keywords": ["lint", "linting", "linter"],
