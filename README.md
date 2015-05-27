@@ -5,7 +5,7 @@ A Brackets extension to enable JSHint support. To install, place in your ```brac
 
 To see the extension in action, open a JavaScript file. In the bottom right corner of your editor you will either see a green checkmark (which means no problems were found) or a yellow exclamation mark. Click on the exclamation mark and a bottom panel will open listing all the problems found.
 
-JSHint can be configured by .jshintrc file located in the project root. See
+JSHint can be configured by .jshintrc file located in the project root or by adding or modifying "jshint.options" and "jshint.globals" under "Debug > Open Preferences File". See
 [jshint documentation](http://www.jshint.com/docs/) for configuration options details and .jshintrc file format.
 
 Brackets has JSLint built in and if you wish to ignore JSLint results, you must tell Brackets to explicitly use JSHint only. This can be done via a .brackets.json file in the root of your project. Simply use this block:
@@ -22,7 +22,9 @@ Brackets has JSLint built in and if you wish to ignore JSLint results, you must 
 Issues/Updates
 =====
 
-[03/11/2015] JSHint 2.6.3 @Hirse
+[5/27/2015] Adding support for global preferences
+
+[3/11/2015] JSHint 2.6.3 @Hirse
 
 [2/7/2015] JSHint 2.6.0
 
