@@ -14,17 +14,28 @@ define(function (require, exports, module) {
         FileUtils               = brackets.getModule("file/FileUtils"),
         PreferencesManager      = brackets.getModule("preferences/PreferencesManager"),
         ProjectManager          = brackets.getModule("project/ProjectManager"),
-        defaultConfig = {
-            "options": {"undef": true},
-            "globals": {}
-        };
+	    pm = PreferencesManager.getExtensionPrefs("jshint"),
+		defaultConfig;
+
+	pm.definePreference("options", "object", {"undef": true})
+        .on("change", function () {
+            defaultConfig.options = pm.get("options");
+        });
+
+	pm.definePreference("globals", "object", {})
+        .on("change", function () {
+            defaultConfig.globals = pm.get("globals");
+        });
+
+	defaultConfig = {
+		"options": pm.get("options"),
+		"globals": pm.get("globals")
+	};
 
     require("jshint/jshint");
 
     var PREF_SCAN_PROJECT_ONLY = "scanProjectOnly",
         JSHINT_NAME = "JSHint";
-
-    var pm = PreferencesManager.getExtensionPrefs("jshint");
 
     pm.definePreference(PREF_SCAN_PROJECT_ONLY, "boolean", false)
         .on("change", function () {
@@ -63,10 +74,12 @@ define(function (require, exports, module) {
 
         // make sure that synchronous linter does not break
         if (!config) {
-            config = defaultConfig;
+            config = {};
         }
 
-        var resultJH = JSHINT(text, config.options, config.globals);
+        var resultJH = JSHINT(text,
+							  $.extend({}, defaultConfig.options, config.options),
+							  $.extend({}, defaultConfig.globals, config.globals));
 
         if (!resultJH) {
             var errors = JSHINT.errors,
