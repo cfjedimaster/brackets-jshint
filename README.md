@@ -21,6 +21,8 @@ Brackets has JSLint built in and if you wish to ignore JSLint results, you must 
 
 Issues/Updates
 =====
+[6/2/2015] JSHint 2.8 pooped the bed. Bad to 2.6.3.
+
 [6/1/2015] JSHint 2.8.0 - hopefully. On GitHub it was marked 2.8, but the comment on top still says 2.7, which I'm assuming is just a typo.
 
 [5/27/2015] Adding support for global preferences
