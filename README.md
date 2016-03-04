@@ -21,6 +21,8 @@ Brackets has JSLint built in and if you wish to ignore JSLint results, you must 
 
 Issues/Updates
 =====
+[3/4/2016] JSHint 2.9.1 thanks to hacker112
+
 [6/2/2015] JSHint 2.8 back thanks to fix by marcelgerber
 
 [6/2/2015] JSHint 2.8 pooped the bed. Bad to 2.6.3.
