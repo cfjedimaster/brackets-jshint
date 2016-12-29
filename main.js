@@ -78,8 +78,8 @@ define(function (require, exports, module) {
         }
 
         var resultJH = JSHINT(text,
-							  $.extend({}, defaultConfig.options, config.options),
-							  $.extend({}, defaultConfig.globals, config.globals));
+							  deepExtend(true, defaultConfig.options, config.options),
+							  deepExtend(true, defaultConfig.globals, config.globals));
 
         if (!resultJH) {
             var errors = JSHINT.errors,
@@ -149,42 +149,46 @@ define(function (require, exports, module) {
         var result = new $.Deferred(),
             file;
         configFileName = configFileName || _configFileName;
-        file = FileSystem.getFileForPath(dir + configFileName);
-        file.read(function (err, content) {
-            if (!err) {
-                var cfg = {},
-                    config;
-                try {
-                    config = JSON.parse(removeComments(content));
-                } catch (e) {
-                    console.error("JSHint: error parsing " + file.fullPath + ". Details: " + e);
-                    result.reject(e);
-                    return;
+        if (configFileName === "jshint.globals") {
+            result.resolve(deepExtend(true, {}, defaultConfig));
+        } else {
+            file = FileSystem.getFileForPath(dir + configFileName);
+            file.read(function (err, content) {
+                if (!err) {
+                    var cfg = {},
+                        config;
+                    try {
+                        config = JSON.parse(removeComments(content));
+                    } catch (e) {
+                        console.error("JSHint: error parsing " + file.fullPath + ". Details: " + e);
+                        result.reject(e);
+                        return;
+                    }
+                    // Load any base config defined by "extends".
+                    // The same functionality as in
+                    // jslints -> cli.js -> loadConfig -> if (config['extends'])...
+                    var baseConfigResult = $.Deferred();
+                    if (config.extends) {
+                        var extendFile = FileSystem.getFileForPath(dir + config.extends);
+                        baseConfigResult = _readConfig(extendFile.parentPath, extendFile.name);
+                        delete config.extends;
+                    } else {
+                        baseConfigResult.resolve({});
+                    }
+                    baseConfigResult.done(function (baseConfig) {
+                        cfg.globals = deepExtend(true, baseConfig.globals, config.globals);
+                        if (config.globals) { delete config.globals; }
+                        cfg.options = deepExtend(true, baseConfig.options, config);
+                        result.resolve(cfg);
+                    }).fail(function (e) {
+                        result.reject(e);
+                    });
+
+                } else {
+                    result.reject(err);
                 }
-                // Load any base config defined by "extends".
-                // The same functionality as in
-                // jslints -> cli.js -> loadConfig -> if (config['extends'])...
-                var baseConfigResult = $.Deferred();
-                if (config.extends) {
-                    var extendFile = FileSystem.getFileForPath(dir + config.extends);
-                    baseConfigResult = _readConfig(extendFile.parentPath, extendFile.name);
-                    delete config.extends;
-                }
-                else {
-                    baseConfigResult.resolve({});
-                }
-                baseConfigResult.done(function (baseConfig) {
-                    cfg.globals = $.extend({}, baseConfig.globals, config.globals);
-                    if (config.globals) { delete config.globals; }
-                    cfg.options = $.extend({}, baseConfig.options, config);
-                    result.resolve(cfg);
-                }).fail(function (e) {
-                    result.reject(e);
-                });
-            } else {
-                result.reject(err);
-            }
-        });
+            });
+        }
         return result.promise();
     }
 
@@ -216,10 +220,10 @@ define(function (require, exports, module) {
                         bundle = overrides[pattern];
 
                         if (bundle.globals) {
-                            $.extend(true, cfg.globals, bundle.globals);
+                            deepExtend(true, cfg.globals, bundle.globals);
                             delete bundle.globals;
                         }
-                        $.extend(true, cfg.options, bundle);
+                        deepExtend(true, cfg.options, bundle);
 
                     }
                 }
@@ -343,6 +347,131 @@ define(function (require, exports, module) {
         str = str.replace(/\/\/[^\n\r]*/g, ""); // Everything after '//'
 
         return str;
+    }
+
+    /**
+     * jQuery's extend function, modified to merge arrays when they do not contain any object (only strings or numbers)
+     * See here:
+     * http://stackoverflow.com/questions/9399365/deep-extend-like-jquerys-for-nodejs
+     *
+     * @param   {object}   target the destination object or true to make deep copy
+     * @param   {object}   successive arguments are the objects to be copied to target
+     * @returns {Function} extended object
+     */
+    function deepExtend() {
+        var options, name, src, copy, copyIsArray, clone, s, isMergeArrays, target = arguments[0] || {},
+            i = 1,
+            length = arguments.length,
+            deep = false,
+            toString = Object.prototype.toString,
+            hasOwn = Object.prototype.hasOwnProperty,
+            class2type = {
+                "[object Boolean]": "boolean",
+                "[object Number]": "number",
+                "[object String]": "string",
+                "[object Function]": "function",
+                "[object Array]": "array",
+                "[object Date]": "date",
+                "[object RegExp]": "regexp",
+                "[object Object]": "object"
+            },
+            jQuery = {
+                isFunction: function (obj) {
+                    return jQuery.type(obj) === "function";
+                },
+                isArray: Array.isArray ||
+                    function (obj) {
+                        return jQuery.type(obj) === "array";
+                    },
+                type: function (obj) {
+                    return obj === null ? String(obj) : class2type[toString.call(obj)] || "object";
+                },
+                isPlainObject: function (obj) {
+                    if (!obj || jQuery.type(obj) !== "object" || obj.nodeType) {
+                        return false;
+                    }
+                    try {
+                        if (obj.constructor && !hasOwn.call(obj, "constructor") && !hasOwn.call(obj.constructor.prototype, "isPrototypeOf")) {
+                            return false;
+                        }
+                    } catch (e) {
+                        return false;
+                    }
+                    var key;
+                    for (key in obj) {}
+                    return key === undefined || hasOwn.call(obj, key);
+                }
+            };
+        if (typeof target === "boolean") {
+            deep = target;
+            target = arguments[1] || {};
+            i = 2;
+        }
+        if (typeof target !== "object" && !jQuery.isFunction(target)) {
+            target = {};
+        }
+        if (length === i) {
+          target = this;
+          --i;
+        }
+        for (i; i < length; i++) {
+            if ((options = arguments[i]) !== null) {
+                for (name in options) {
+                    if (hasOwn.call(options, name)) {
+                        src = target[name];
+                        copy = options[name];
+                        if (target === copy) {
+                            continue;
+                        }
+                        if (deep && copy && (jQuery.isPlainObject(copy) || (copyIsArray = jQuery.isArray(copy)))) {
+                            isMergeArrays = true;
+                            for (s in src) {
+                                if (jQuery.isArray(src[s]) || jQuery.isPlainObject(src[s]) || jQuery.isFunction(src[s])) {
+                                    isMergeArrays = false;
+                                    break;
+                                }
+                            }
+                            if (copyIsArray && isMergeArrays) {
+                                clone = src && jQuery.isArray(src) ? src : [];
+                                clone = clone.concat(copy);
+                                target[name] = arrayUnique(clone);
+                                continue;
+
+                            } else if (copyIsArray) {
+                                copyIsArray = false;
+                                clone = src && jQuery.isArray(src) ? src : [];
+                            } else {
+                                clone = src && jQuery.isPlainObject(src) ? src : {};
+                            }
+                            // WARNING: RECURSION
+                            target[name] = deepExtend(deep, clone, copy);
+                        } else if (copy !== undefined) {
+                            target[name] = copy;
+                        }
+                    }
+                }
+            }
+        }
+        return target;
+    }
+
+    /**
+     * Eliminate duplicate elements from array
+     *
+     * @param   {array} array the array to be cleaned
+     * @returns {array} de-duplicated array
+     */
+    function arrayUnique(array) {
+        var i, j, a = array.concat();
+        for (i = 0; i < a.length; i += 1) {
+            for (j = i + 1; j < a.length; j += 1) {
+                if (a[i] === a[j]) {
+                    a.splice(j, 1);
+                    j += 1;
+                }
+            }
+        }
+        return a;
     }
 
     CodeInspection.register("javascript", {
