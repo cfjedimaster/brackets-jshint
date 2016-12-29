@@ -13627,6 +13627,10 @@ function now() {
     // as an AMD module. See http://requirejs.org/docs/errors.html#mismatch for
     // more details.
     root._ = _;
+    /**
+     * PATCH for Brackets JSHint extension
+     */
+    module.exports = _;
 
     // Define as an anonymous module so, through path mapping, it can be
     // referenced as the "underscore" module.
