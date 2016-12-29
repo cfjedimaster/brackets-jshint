@@ -21,6 +21,8 @@ Brackets has JSLint built in and if you wish to ignore JSLint results, you must 
 
 Issues/Updates
 =====
+[12/29/2016] JSHint 2.9.4 thanks to hacker112
+
 [3/4/2016] JSHint 2.9.1 thanks to hacker112
 
 [6/2/2015] JSHint 2.8 back thanks to fix by marcelgerber
@@ -60,7 +62,7 @@ In order to set the pref to limit the scan to project subtree, add the following
     "jshint.scanProjectOnly": true 
 }
 
-[6/2/2014] Merge in an improvement by hack112 to add "extends" support to .jshintrc. Details here: https://github.com/cfjedimaster/brackets-jshint/pull/54
+[6/2/2014] Merge in an improvement by hacker112 to add "extends" support to .jshintrc. Details here: https://github.com/cfjedimaster/brackets-jshint/pull/54
 
 [5/20/2014] Fix by cgcgbcbc - update JSHint to 2.5.1
 
